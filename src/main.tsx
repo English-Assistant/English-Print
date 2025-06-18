@@ -1,8 +1,13 @@
+import '@ant-design/v5-patch-for-react-19';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import 'virtual:uno.css';
 import { routeTree } from './routeTree.gen';
+import { ConfigProvider } from 'antd';
+import 'dayjs/locale/zh-cn';
+import zhCN from 'antd/locale/zh_CN';
+import '@unocss/reset/tailwind-compat.css';
 
 const router = createRouter({ routeTree });
 
@@ -14,6 +19,8 @@ declare module '@tanstack/react-router' {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ConfigProvider theme={{ cssVar: true, hashed: false }} locale={zhCN}>
+      <RouterProvider router={router} />
+    </ConfigProvider>
   </StrictMode>,
 );
