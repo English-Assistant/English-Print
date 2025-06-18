@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unit Schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the unit"
+    },
+    "word_copy": {
+      "type": "array",
+      "description": "List of words for copying",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sentence_copy": {
+      "type": "array",
+      "description": "List of sentences for copying",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sentence_transform": {
+      "type": "array",
+      "description": "List of sentences for transformation copying",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["title", "word_copy", "sentence_copy", "sentence_transform"]
+}

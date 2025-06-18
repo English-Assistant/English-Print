@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useStore } from '@/store';
+import { usePaperStore } from '@/stores';
 
-export const Route = createFileRoute('/paper/[id]')({
+export const Route = createFileRoute('/paper/$id')({
   component: ExamPaper,
 });
 
 function ExamPaper() {
   const { id } = Route.useParams() as { id: string };
-  const { papers } = useStore();
+  const { papers } = usePaperStore();
   const paperRecord = papers.find((p) => p.id === id);
   if (!paperRecord) return <div className="p-6">未找到试卷</div>;
 

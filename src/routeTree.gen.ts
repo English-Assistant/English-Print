@@ -11,12 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ManageRouteImport } from './routes/_manage'
 import { Route as ManageIndexRouteImport } from './routes/_manage/index'
-import { Route as SentenceCopyChar91idChar93RouteImport } from './routes/sentence-copy/[id]'
-import { Route as PreclassGuideChar91idChar93RouteImport } from './routes/preclass-guide/[id]'
-import { Route as PaperChar91idChar93RouteImport } from './routes/paper/[id]'
-import { Route as AnswerChar91idChar93RouteImport } from './routes/answer/[id]'
+import { Route as SentenceCopyIdRouteImport } from './routes/sentence-copy/$id'
+import { Route as PreclassGuideIdRouteImport } from './routes/preclass-guide/$id'
+import { Route as PaperIdRouteImport } from './routes/paper/$id'
+import { Route as AnswerIdRouteImport } from './routes/answer/$id'
 import { Route as ManageCoursesRouteImport } from './routes/_manage/courses'
-import { Route as ManagePaperDetailChar91idChar93RouteImport } from './routes/_manage/paper-detail/[id]'
+import { Route as ManagePaperDetailIdRouteImport } from './routes/_manage/paper-detail/$id'
 
 const ManageRoute = ManageRouteImport.update({
   id: '/_manage',
@@ -27,26 +27,24 @@ const ManageIndexRoute = ManageIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ManageRoute,
 } as any)
-const SentenceCopyChar91idChar93Route =
-  SentenceCopyChar91idChar93RouteImport.update({
-    id: '/sentence-copy/[id]',
-    path: '/sentence-copy/[id]',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PreclassGuideChar91idChar93Route =
-  PreclassGuideChar91idChar93RouteImport.update({
-    id: '/preclass-guide/[id]',
-    path: '/preclass-guide/[id]',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PaperChar91idChar93Route = PaperChar91idChar93RouteImport.update({
-  id: '/paper/[id]',
-  path: '/paper/[id]',
+const SentenceCopyIdRoute = SentenceCopyIdRouteImport.update({
+  id: '/sentence-copy/$id',
+  path: '/sentence-copy/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnswerChar91idChar93Route = AnswerChar91idChar93RouteImport.update({
-  id: '/answer/[id]',
-  path: '/answer/[id]',
+const PreclassGuideIdRoute = PreclassGuideIdRouteImport.update({
+  id: '/preclass-guide/$id',
+  path: '/preclass-guide/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaperIdRoute = PaperIdRouteImport.update({
+  id: '/paper/$id',
+  path: '/paper/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnswerIdRoute = AnswerIdRouteImport.update({
+  id: '/answer/$id',
+  path: '/answer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManageCoursesRoute = ManageCoursesRouteImport.update({
@@ -54,79 +52,78 @@ const ManageCoursesRoute = ManageCoursesRouteImport.update({
   path: '/courses',
   getParentRoute: () => ManageRoute,
 } as any)
-const ManagePaperDetailChar91idChar93Route =
-  ManagePaperDetailChar91idChar93RouteImport.update({
-    id: '/paper-detail/[id]',
-    path: '/paper-detail/[id]',
-    getParentRoute: () => ManageRoute,
-  } as any)
+const ManagePaperDetailIdRoute = ManagePaperDetailIdRouteImport.update({
+  id: '/paper-detail/$id',
+  path: '/paper-detail/$id',
+  getParentRoute: () => ManageRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/courses': typeof ManageCoursesRoute
-  '/answer/[id]': typeof AnswerChar91idChar93Route
-  '/paper/[id]': typeof PaperChar91idChar93Route
-  '/preclass-guide/[id]': typeof PreclassGuideChar91idChar93Route
-  '/sentence-copy/[id]': typeof SentenceCopyChar91idChar93Route
+  '/answer/$id': typeof AnswerIdRoute
+  '/paper/$id': typeof PaperIdRoute
+  '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
-  '/paper-detail/[id]': typeof ManagePaperDetailChar91idChar93Route
+  '/paper-detail/$id': typeof ManagePaperDetailIdRoute
 }
 export interface FileRoutesByTo {
   '/courses': typeof ManageCoursesRoute
-  '/answer/[id]': typeof AnswerChar91idChar93Route
-  '/paper/[id]': typeof PaperChar91idChar93Route
-  '/preclass-guide/[id]': typeof PreclassGuideChar91idChar93Route
-  '/sentence-copy/[id]': typeof SentenceCopyChar91idChar93Route
+  '/answer/$id': typeof AnswerIdRoute
+  '/paper/$id': typeof PaperIdRoute
+  '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
-  '/paper-detail/[id]': typeof ManagePaperDetailChar91idChar93Route
+  '/paper-detail/$id': typeof ManagePaperDetailIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_manage': typeof ManageRouteWithChildren
   '/_manage/courses': typeof ManageCoursesRoute
-  '/answer/[id]': typeof AnswerChar91idChar93Route
-  '/paper/[id]': typeof PaperChar91idChar93Route
-  '/preclass-guide/[id]': typeof PreclassGuideChar91idChar93Route
-  '/sentence-copy/[id]': typeof SentenceCopyChar91idChar93Route
+  '/answer/$id': typeof AnswerIdRoute
+  '/paper/$id': typeof PaperIdRoute
+  '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/_manage/': typeof ManageIndexRoute
-  '/_manage/paper-detail/[id]': typeof ManagePaperDetailChar91idChar93Route
+  '/_manage/paper-detail/$id': typeof ManagePaperDetailIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/courses'
-    | '/answer/[id]'
-    | '/paper/[id]'
-    | '/preclass-guide/[id]'
-    | '/sentence-copy/[id]'
+    | '/answer/$id'
+    | '/paper/$id'
+    | '/preclass-guide/$id'
+    | '/sentence-copy/$id'
     | '/'
-    | '/paper-detail/[id]'
+    | '/paper-detail/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/courses'
-    | '/answer/[id]'
-    | '/paper/[id]'
-    | '/preclass-guide/[id]'
-    | '/sentence-copy/[id]'
+    | '/answer/$id'
+    | '/paper/$id'
+    | '/preclass-guide/$id'
+    | '/sentence-copy/$id'
     | '/'
-    | '/paper-detail/[id]'
+    | '/paper-detail/$id'
   id:
     | '__root__'
     | '/_manage'
     | '/_manage/courses'
-    | '/answer/[id]'
-    | '/paper/[id]'
-    | '/preclass-guide/[id]'
-    | '/sentence-copy/[id]'
+    | '/answer/$id'
+    | '/paper/$id'
+    | '/preclass-guide/$id'
+    | '/sentence-copy/$id'
     | '/_manage/'
-    | '/_manage/paper-detail/[id]'
+    | '/_manage/paper-detail/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   ManageRoute: typeof ManageRouteWithChildren
-  AnswerChar91idChar93Route: typeof AnswerChar91idChar93Route
-  PaperChar91idChar93Route: typeof PaperChar91idChar93Route
-  PreclassGuideChar91idChar93Route: typeof PreclassGuideChar91idChar93Route
-  SentenceCopyChar91idChar93Route: typeof SentenceCopyChar91idChar93Route
+  AnswerIdRoute: typeof AnswerIdRoute
+  PaperIdRoute: typeof PaperIdRoute
+  PreclassGuideIdRoute: typeof PreclassGuideIdRoute
+  SentenceCopyIdRoute: typeof SentenceCopyIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -145,32 +142,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManageIndexRouteImport
       parentRoute: typeof ManageRoute
     }
-    '/sentence-copy/[id]': {
-      id: '/sentence-copy/[id]'
-      path: '/sentence-copy/[id]'
-      fullPath: '/sentence-copy/[id]'
-      preLoaderRoute: typeof SentenceCopyChar91idChar93RouteImport
+    '/sentence-copy/$id': {
+      id: '/sentence-copy/$id'
+      path: '/sentence-copy/$id'
+      fullPath: '/sentence-copy/$id'
+      preLoaderRoute: typeof SentenceCopyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/preclass-guide/[id]': {
-      id: '/preclass-guide/[id]'
-      path: '/preclass-guide/[id]'
-      fullPath: '/preclass-guide/[id]'
-      preLoaderRoute: typeof PreclassGuideChar91idChar93RouteImport
+    '/preclass-guide/$id': {
+      id: '/preclass-guide/$id'
+      path: '/preclass-guide/$id'
+      fullPath: '/preclass-guide/$id'
+      preLoaderRoute: typeof PreclassGuideIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/paper/[id]': {
-      id: '/paper/[id]'
-      path: '/paper/[id]'
-      fullPath: '/paper/[id]'
-      preLoaderRoute: typeof PaperChar91idChar93RouteImport
+    '/paper/$id': {
+      id: '/paper/$id'
+      path: '/paper/$id'
+      fullPath: '/paper/$id'
+      preLoaderRoute: typeof PaperIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/answer/[id]': {
-      id: '/answer/[id]'
-      path: '/answer/[id]'
-      fullPath: '/answer/[id]'
-      preLoaderRoute: typeof AnswerChar91idChar93RouteImport
+    '/answer/$id': {
+      id: '/answer/$id'
+      path: '/answer/$id'
+      fullPath: '/answer/$id'
+      preLoaderRoute: typeof AnswerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_manage/courses': {
@@ -180,11 +177,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManageCoursesRouteImport
       parentRoute: typeof ManageRoute
     }
-    '/_manage/paper-detail/[id]': {
-      id: '/_manage/paper-detail/[id]'
-      path: '/paper-detail/[id]'
-      fullPath: '/paper-detail/[id]'
-      preLoaderRoute: typeof ManagePaperDetailChar91idChar93RouteImport
+    '/_manage/paper-detail/$id': {
+      id: '/_manage/paper-detail/$id'
+      path: '/paper-detail/$id'
+      fullPath: '/paper-detail/$id'
+      preLoaderRoute: typeof ManagePaperDetailIdRouteImport
       parentRoute: typeof ManageRoute
     }
   }
@@ -193,13 +190,13 @@ declare module '@tanstack/react-router' {
 interface ManageRouteChildren {
   ManageCoursesRoute: typeof ManageCoursesRoute
   ManageIndexRoute: typeof ManageIndexRoute
-  ManagePaperDetailChar91idChar93Route: typeof ManagePaperDetailChar91idChar93Route
+  ManagePaperDetailIdRoute: typeof ManagePaperDetailIdRoute
 }
 
 const ManageRouteChildren: ManageRouteChildren = {
   ManageCoursesRoute: ManageCoursesRoute,
   ManageIndexRoute: ManageIndexRoute,
-  ManagePaperDetailChar91idChar93Route: ManagePaperDetailChar91idChar93Route,
+  ManagePaperDetailIdRoute: ManagePaperDetailIdRoute,
 }
 
 const ManageRouteWithChildren =
@@ -207,10 +204,10 @@ const ManageRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   ManageRoute: ManageRouteWithChildren,
-  AnswerChar91idChar93Route: AnswerChar91idChar93Route,
-  PaperChar91idChar93Route: PaperChar91idChar93Route,
-  PreclassGuideChar91idChar93Route: PreclassGuideChar91idChar93Route,
-  SentenceCopyChar91idChar93Route: SentenceCopyChar91idChar93Route,
+  AnswerIdRoute: AnswerIdRoute,
+  PaperIdRoute: PaperIdRoute,
+  PreclassGuideIdRoute: PreclassGuideIdRoute,
+  SentenceCopyIdRoute: SentenceCopyIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

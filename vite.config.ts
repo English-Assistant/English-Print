@@ -4,6 +4,7 @@ import UnoCSS from 'unocss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { codeInspectorPlugin } from 'code-inspector-plugin';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -20,5 +21,8 @@ export default defineConfig({
     }),
     svgr(),
     tsconfigPaths(),
+    codeInspectorPlugin({
+      bundler: 'vite',
+    }),
   ],
 });

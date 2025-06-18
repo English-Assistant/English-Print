@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnglishExerciseSheet_AnswerKey",
+  "description": "小学英语练习试卷参考答案结构定义（教师/家长使用）",
+  "type": "object",
+  "properties": {
+    "unit": {
+      "type": "string",
+      "description": "单元名称，用于标识答案对应的试卷"
+    },
+    "title": {
+      "type": "string",
+      "description": "试卷标题，用于标识答案对应的试卷"
+    },
+    "sections": {
+      "type": "array",
+      "description": "答案按试卷的各部分题型组织",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "题型分类标识，与试卷保持一致"
+          },
+          "title": {
+            "type": "string",
+            "description": "该部分题型标题，如 '一、词汇填空'"
+          },
+          "questions": {
+            "type": "array",
+            "description": "答案列表",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "题目唯一编号或序号，用于和试卷题目对应"
+                },
+                "question": {
+                  "type": "string",
+                  "description": "题干内容（可选，用于核对上下文）"
+                },
+                "answer": {
+                  "type": "string",
+                  "description": "该题的正确答案"
+                }
+              },
+              "required": ["id", "answer"]
+            }
+          }
+        },
+        "required": ["type", "title", "questions"]
+      }
+    }
+  },
+  "required": ["unit", "title", "sections"]
+}

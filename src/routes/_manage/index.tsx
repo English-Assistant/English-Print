@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { useStore } from '@/store';
+import { usePaperStore, useCourseStore } from '@/stores';
 import NewPaperModal from './-NewPaperModal';
 
 export const Route = createFileRoute('/_manage/')({
@@ -16,7 +16,8 @@ export const Route = createFileRoute('/_manage/')({
 });
 
 function PaperManagement() {
-  const { papers, deletePaper, courses } = useStore();
+  const { papers, deletePaper } = usePaperStore();
+  const { courses } = useCourseStore();
   const [keyword, setKeyword] = useState('');
   const [open, setOpen] = useState(false);
 
@@ -56,7 +57,7 @@ function PaperManagement() {
           {filtered.map((paper) => (
             <Col key={paper.id} xs={24} sm={12} lg={8}>
               <Link
-                to="/paper-detail/[id]"
+                to="/paper-detail/$id"
                 params={{ id: paper.id }}
                 className="block"
               >

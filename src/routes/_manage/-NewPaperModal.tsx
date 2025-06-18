@@ -1,5 +1,5 @@
 import { Modal, Form, Input, Select, message } from 'antd';
-import { useStore } from '@/store';
+import { usePaperStore, useCourseStore } from '@/stores';
 
 interface Props {
   open: boolean;
@@ -8,7 +8,8 @@ interface Props {
 
 /** 新建试卷弹窗 */
 export default function NewPaperModal({ open, onClose }: Props) {
-  const { courses, addPaper } = useStore();
+  const { addPaper } = usePaperStore();
+  const { courses } = useCourseStore();
   const [form] = Form.useForm();
 
   const handleOk = async () => {

@@ -16,7 +16,7 @@ import {
   CheckOutlined,
   CloseOutlined,
 } from '@ant-design/icons';
-import { useStore } from '@/store';
+import { useCourseStore } from '@/stores';
 import { useState } from 'react';
 
 export const Route = createFileRoute('/_manage/courses')({
@@ -29,7 +29,7 @@ interface RowEditing {
 }
 
 function CoursePage() {
-  const { courses, addCourse, updateCourse, deleteCourse } = useStore();
+  const { courses, addCourse, updateCourse, deleteCourse } = useCourseStore();
   const [editing, setEditing] = useState<RowEditing | null>(null);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
@@ -37,7 +37,7 @@ function CoursePage() {
   const handleAdd = async () => {
     try {
       const { name } = await form.validateFields();
-      addCourse({ name: name.trim() });
+      addCourse(name.trim());
       message.success('新增成功');
       setOpen(false);
       form.resetFields();

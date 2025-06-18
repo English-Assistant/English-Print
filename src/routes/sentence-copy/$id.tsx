@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useStore } from '@/store';
+import { usePaperStore } from '@/stores';
 
-export const Route = createFileRoute('/sentence-copy/[id]')({
+export const Route = createFileRoute('/sentence-copy/$id')({
   component: SentenceCopy,
 });
 
 function SentenceCopy() {
   const { id } = Route.useParams() as { id: string };
-  const { papers } = useStore();
+  const { papers } = usePaperStore();
   const paper = papers.find((p) => p.id === id);
 
   if (!paper) {
