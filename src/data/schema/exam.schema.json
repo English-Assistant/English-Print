@@ -1,74 +1,211 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "EnglishExerciseSheet_TestPaper",
-  "description": "小学英语练习试卷结构定义（学生作答部分，不含答案）",
+  "title": "中小学英语试卷结构定义",
+  "description": "一个为定义结构化英语试卷内容设计的灵活 Schema，专为前端应用渲染优化。",
   "type": "object",
   "properties": {
-    "unit": {
-      "type": "string",
-      "description": "单元名称，如 'Unit 5'"
-    },
     "title": {
       "type": "string",
-      "description": "试卷标题，如 'Unit 5 练习卷 A'"
+      "description": "试卷的主标题，例如 '二年级上 Unit 5 + 复习练习卷'。"
     },
     "sections": {
       "type": "array",
-      "description": "练习卷的各部分题型",
+      "description": "试卷主要大题的数组（例如，一、二、三）。",
       "items": {
+        "$ref": "#/$defs/section"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "sections"
+  ],
+  "$defs": {
+    "section": {
+      "type": "object",
+      "description": "试卷的一个主要大题，如 '一、词汇选择 + 翻译'。",
+      "properties": {
+        "sectionNumber": {
+          "type": "string",
+          "description": "大题的序号，例如 '一', '二'。"
+        },
+        "title": {
+          "type": "string",
+          "description": "大题的标题，不包含分数。"
+        },
+        "points": {
+          "type": "number",
+          "description": "该大题的总分值。"
+        },
+        "instructions": {
+          "type": "string",
+          "description": "适用于整个大题的通用说明。"
+        },
+        "parts": {
+          "type": "array",
+          "description": "一个大题由一个或多个部分组成。例如听力题包含'听单词'、'判断正误'等多个部分。",
+          "items": {
+            "$ref": "#/$defs/part"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "parts"
+      ]
+    },
+    "part": {
+      "type": "object",
+      "description": "大题内部的结构化组件，可以有自己的小标题和说明。",
+      "properties": {
+        "partNumber": {
+          "type": "string",
+          "description": "部分的可选标识符，例如 '(1)', 'A'。"
+        },
+        "instructions": {
+          "type": "string",
+          "description": "针对此部分的特定说明。"
+        },
+        "content": {
+          "type": "array",
+          "description": "构成此部分的内容项数组。允许混合文章、问题、词库等元素。",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/content/wordBank"
+              },
+              {
+                "$ref": "#/$defs/content/matching"
+              },
+              {
+                "$ref": "#/$defs/content/passage"
+              },
+              {
+                "$ref": "#/$defs/content/question"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "content"
+      ]
+    },
+    "content": {
+      "wordBank": {
         "type": "object",
+        "description": "用于提供选项词汇的模块。",
         "properties": {
           "type": {
-            "type": "string",
-            "description": "题型分类标识，如 vocabulary_fill, sentence_pattern, listening_match, etc.",
-            "enum": [
-              "vocabulary_fill",
-              "vocabulary_translate",
-              "sentence_fill",
-              "sentence_translate",
-              "guided_writing",
-              "reading_comprehension",
-              "listening_match",
-              "review_mix"
-            ]
+            "const": "WORD_BANK"
           },
-          "title": {
+          "label": {
             "type": "string",
-            "description": "该部分题型标题，如 '一、词汇填空'"
+            "description": "词汇库的标签，例如 '选项：'"
           },
-          "instructions": {
-            "type": "string",
-            "description": "题型说明，指导学生如何作答"
-          },
-          "questions": {
+          "words": {
             "type": "array",
-            "description": "题目列表，每道题按顺序编号",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "words"
+        ]
+      },
+      "matching": {
+        "type": "object",
+        "description": "定义一个完整的连线匹配题。",
+        "properties": {
+          "type": {
+            "const": "MATCHING"
+          },
+          "stems": {
+            "type": "array",
+            "description": "左侧待匹配项（题干）。",
             "items": {
               "type": "object",
               "properties": {
                 "id": {
-                  "type": "string",
-                  "description": "题目唯一编号或序号"
+                  "type": "string"
                 },
-                "question": {
-                  "type": "string",
-                  "description": "题干内容，支持使用 __ 表示填空"
-                },
-                "options": {
-                  "type": "array",
-                  "description": "用于选择题的选项列表（若为选择题时必填）",
-                  "items": {
-                    "type": "string"
-                  }
+                "text": {
+                  "type": "string"
                 }
-              },
-              "required": ["id", "question"]
+              }
+            }
+          },
+          "options": {
+            "type": "array",
+            "description": "右侧可选项（选项）。",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
-        "required": ["type", "title", "questions"]
+        "required": [
+          "type",
+          "stems",
+          "options"
+        ]
+      },
+      "passage": {
+        "type": "object",
+        "description": "用于阅读理解的文章模块。",
+        "properties": {
+          "type": {
+            "const": "READING_PASSAGE"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ]
+      },
+      "question": {
+        "type": "object",
+        "description": "表示单个问题的通用模块。",
+        "properties": {
+          "type": {
+            "const": "QUESTION"
+          },
+          "questionType": {
+            "type": "string",
+            "description": "问题的具体类型，决定了其 data 负载的结构。",
+            "enum": [
+              "FILL_IN_BLANK_AND_TRANSLATE",
+              "FILL_IN_BLANK",
+              "TRANSLATE_ZH_TO_EN",
+              "GUIDED_WRITING",
+              "MULTI_SELECT_CHOICE",
+              "TRUE_FALSE",
+              "OPEN_ENDED"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "description": "问题的具体内容，其结构取决于 questionType。"
+          }
+        },
+        "required": [
+          "type",
+          "questionType",
+          "data"
+        ]
       }
     }
-  },
-  "required": ["unit", "title", "sections"]
+  }
 }

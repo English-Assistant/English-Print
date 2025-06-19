@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Form, Input, message } from 'antd';
 import VanillaJsonEditor from '@/components/VanillaJsonEditor';
 import { usePaperStore } from '@/stores';
 import Ajv2020 from 'ajv/dist/2020';
-// eslint-disable-next-line import/no-named-as-default-member
 import draft7Meta from 'ajv/dist/refs/json-schema-draft-07.json';
 import examSchema from '@/data/schema/exam.schema.json';
 import answerSchema from '@/data/schema/answer.schema.json';
@@ -34,57 +33,29 @@ export default function SectionEditModal({
   const paper = papers.find((p) => p.id === paperId);
 
   const [markdown, setMarkdown] = useState('');
-  const [jsonValue, setJsonValue] = useState<Record<string, unknown>>({});
 
-  // 初始化数据
-  useEffect(() => {
-    if (!open || !sectionKey || !paper) return;
+  const jsonValue = sectionKey ? (paper?.[sectionKey] ?? {}) : {};
+
+  const [form] = Form.useForm();
+
+  const handleSave = async () => {
+    const values = await form.validateFields();
+
     if (sectionKey === 'preclass') {
-      setMarkdown(paper.preclass || '');
+      updatePaper(paperId, { preclass: values.preclass as string });
     } else {
-      try {
-        const init = paper[sectionKey]
-          ? JSON.parse(paper[sectionKey] as string)
-          : {};
-        setJsonValue(init);
-      } catch {
-        setJsonValue({});
-      }
+      const payload = values.json as Record<string, unknown>;
+
+      if (sectionKey === 'copyJson')
+        updatePaper(paperId, { copyJson: payload });
+      if (sectionKey === 'examJson')
+        updatePaper(paperId, { examJson: payload });
+      if (sectionKey === 'answerJson')
+        updatePaper(paperId, { answerJson: payload });
     }
-  }, [open, sectionKey, paper]);
-
-  const handleSave = () => {
-    if (!sectionKey || !paper) return;
-
-    if (sectionKey === 'preclass') {
-      if (!markdown.trim()) {
-        message.error('内容不能为空');
-        return;
-      }
-      updatePaper(paperId, { preclass: markdown });
-      message.success('保存成功');
-      onClose();
-      return;
-    }
-
-    // JSON 校验
-    let valid = true;
-    if (sectionKey === 'copyJson') valid = validateCopy(jsonValue);
-    if (sectionKey === 'examJson') valid = validateExam(jsonValue);
-    if (sectionKey === 'answerJson') valid = validateAnswer(jsonValue);
-
-    if (!valid) {
-      const errMsg = (validateCopy.errors ||
-        validateExam.errors ||
-        validateAnswer.errors ||
-        [])?.[0]?.message;
-      message.error(`Schema 校验失败: ${errMsg}`);
-      return;
-    }
-
-    updatePaper(paperId, { [sectionKey]: JSON.stringify(jsonValue) });
     message.success('保存成功');
     onClose();
+    return;
   };
 
   const titleMap: Record<SectionKey, string> = {
@@ -109,6 +80,7 @@ export default function SectionEditModal({
             label="Markdown 内容"
             required
             rules={[{ required: true, message: '不能为空' }]}
+            name="preclass"
           >
             <Input.TextArea
               rows={12}
@@ -118,9 +90,32 @@ export default function SectionEditModal({
           </Form.Item>
         </Form>
       ) : (
-        <div className="h-[500px] overflow-hidden">
-          <VanillaJsonEditor value={jsonValue} onChange={setJsonValue} />
-        </div>
+        <Form form={form} layout="vertical" initialValues={{ json: jsonValue }}>
+          <Form.Item
+            name="json"
+            getValueProps={(v) => {
+              return typeof v === 'string' ? JSON.parse(v) : v;
+            }}
+            rules={[
+              {
+                validator: async (_rule, v: Record<string, unknown>) => {
+                  let valid = true;
+                  if (sectionKey === 'copyJson') valid = validateCopy(v);
+                  if (sectionKey === 'examJson') valid = validateExam(v);
+                  if (sectionKey === 'answerJson') valid = validateAnswer(v);
+                  return valid
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('JSON Schema 校验失败'));
+                },
+              },
+            ]}
+          >
+            <VanillaJsonEditor
+              readOnly={false}
+              className="h-[500px] overflow-hidden"
+            />
+          </Form.Item>
+        </Form>
       )}
     </Modal>
   );

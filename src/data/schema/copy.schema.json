@@ -5,29 +5,34 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "The title of the unit"
+      "description": "单元标题"
     },
     "word_copy": {
       "type": "array",
-      "description": "List of words for copying",
+      "description": "需要抄写的单词列表",
       "items": {
         "type": "string"
       }
     },
     "sentence_copy": {
       "type": "array",
-      "description": "List of sentences for copying",
+      "description": "需要抄写的句子列表",
       "items": {
         "type": "string"
       }
     },
     "sentence_transform": {
       "type": "array",
-      "description": "List of sentences for transformation copying",
+      "description": "根据句子结构来变形来的句子列表，考虑句子的知识点，但是换一种形式来练习",
       "items": {
         "type": "string"
       }
     }
   },
-  "required": ["title", "word_copy", "sentence_copy", "sentence_transform"]
+  "required": [
+    "title",
+    "word_copy",
+    "sentence_copy",
+    "sentence_transform"
+  ]
 }

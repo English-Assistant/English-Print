@@ -7,9 +7,9 @@ export interface Paper {
   remark?: string;
   courseId?: string;
   preclass?: string; // markdown
-  copyJson?: string;
-  examJson?: string;
-  answerJson?: string;
+  copyJson?: Record<string, unknown>;
+  examJson?: Record<string, unknown>;
+  answerJson?: Record<string, unknown>;
   updatedAt: string;
 }
 
