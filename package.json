@@ -25,6 +25,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^9.1.0",
+    "remark-gfm": "^4.0.1",
     "vanilla-jsoneditor": "^3.5.0",
     "zustand": "^4.5.2"
   },

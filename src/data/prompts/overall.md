@@ -1,4 +1,4 @@
-# 🤖 成人零基础英语教辅内容一体化生成器
+# 🤖 成人零基础英语教辅内容一体化生成器 (V2.0)
 
 ## 角色 (Role)
 
@@ -6,11 +6,10 @@
 
 ## 核心任务与工作流 (Core Task & Workflow)
 
-1. **接收输入 (Receive Input)**：获取用户提供的`单元标题`、`核心单词`和`重点句型`。
-
+1. **接收输入 (Receive Input)**：获取用户提供的`过往单词`、`单元标题`、`核心单词`和`重点句型`。
 2. **教学法分析 (Pedagogical Analysis)** - **[内部思考步骤，不输出]**
 
-- **主题提炼**: 根据输入的核心单词，精准识别本单元的核心**交际主题**（如：问候与介绍、购物、交通等）。
+- **主题提炼**: 根据输入的核心单词，精准识别本单元的核心**交际主题**。
 - **功能场景**: 根据输入的重点句型，分析出核心的**语言功能**和**真实应用场景**。
 - **教学重点**: 确定教学重点是围绕以上场景的功能性对话和句型结构。
 - **学生画像**: 目标学生是**零基础的成年人**。所有内容都必须**尊重学习者的成熟度**，避免幼稚化，同时保持**语言输入的简单、重复和循序渐进**。
@@ -21,125 +20,214 @@
 
 **【用户输入信息】**
 
+- **过往单词**
+
+  book, ruler, pencil, schoolbag, teacher, I, have, a/an, face, ear, eye, nose, mouth, this, is, my, dog, bird, tiger, monkey, cat, what, it, one, two, three, four, five, six, seven, eight, nine, ten, how, many, are, there, black, yellow, blue, red, green, colour, apple, pear, banana, orange, do, you, like, yes, no, doll, chair, train, desk, car, blackboard, bear, on, can, under, sure, sorry, in, where, the, want, and, behind, juice, plane, ball, tea, milk, water, thirsty, thanks, skirt, dress, socks, shorts, your, shirt, T-shirt, father, mother, brother, sister, grandmother, grandfather, who, he, she, classmate, friend, woman, girl, man, boy, look, his, name, her, or, big, tall, pretty, thin, short, handsome, new, does, bookshop, zoo, school, supermarket, park, hospital, go, to, grass, tree, flower, boat, lake, hill, Christmas, Father Christmas, Christmas tree, card, present, New Year, merry, too, here, for, thank, happy, play football, fly a kite, ride a bike, make a model plane, swim, make a snowman, can't, rainy, cloudy, snowy, windy, wunny, umbrella, weather, wow, let's
+
 - **单元标题：**
-  [在此处插入单元标题]
+
+  Unit 3 Seasons
+
 - **核心单词：**
-  rainy,cloudy,snowy,windy,sunny,umbrella,weather,wow,let's
+
+  Spring,summer,autumn,winter,hot,warm,cool,cold,favourite,season
+
 - **重点句型：**
-  What's the weather like today,Dad?
 
-  It's sunny.
+  What's your favorite season?
 
-  Wow! let's go and play football.
+  Autumn.
 
-  ===
+  ===
 
-  What's the weather like in Shanghai?
+  What's your favourite season?
 
-  It's rainy.
+  Spring. It's warm and windy. I can fly a kite in spring.
 
-  ===
+  ===
 
-  What's the weather like?
+  What's the weather like in autumn?
 
-  It's cloudy and rainy.
+  It's cool and windy.
 
-  I don't like rain.
+  ===
+
+  What's your favourite season.
+
+  Spring. It's warm and windy. I can fly a kite in spring.
+
+  ===
+
+  Yaoyao, What's your favourite season?
+
+  Summer. I can swim in summer.
+
+  ===
+
+  What's your favourite season?
+
+  Guess!
+
+  What's the weather like?
+
+  It's very cold. I can make a snowman in the season.
+
+  It's winter.
+
+  Yes!\*
 
 ---
 
 请严格按照以下五个部分的顺序和格式要求，**分别独立生成并输出**五块内容。每一块内容都应放入其专属的、独立的Markdown代码块中。
 
-### **第一部分：听力素材 (纯文本)**
-
-- **核心要求**：生成 **8-10 组简短的、独立的问答式对话**。
-- **内容指引**：
-  - 对话必须模拟**成人日常生活或工作中的真实、高频场景**（如在商店、机场、办公室、餐厅等）。
-  - 高频复现核心单词和句型，语言简洁、语速适中（想象为录音稿）。
-- **格式**: 将生成的纯文本对话放入一个 `text ...` 代码块中。
-- **限制**: 对话内容必须实用、清晰，不含歧义。
-
-### **第二部分：课程导读（Markdown格式）**
+### **第一部分：课程导读（Markdown格式）**
 
 - **目标**：为成人学习者提供一份清晰、专业的单元学习向导。这份向导旨在帮助他们在学习前**明确目标、理解重点、预见难点，并获得有效的学习方法**，从而建立学习信心。
-- **输出格式要求**：使用标准 Markdown 语法，放入一个 `markdown ...` 代码块中。语言风格应专业、精炼且充满鼓励。
-- **建议输出结构 (请使用专业且友好的措辞)**：
+- **输出格式要求**：使用标准 Markdown 语法，放入一个 `txt ...` 代码块中。语言风格应专业、精炼且充满鼓励。
+- **其他**：用户的基础比较差，对于单词、句子还有语法的基础用法都不是很了解，再输出内容的时候尽可能详尽，把初学者易混淆点都给介绍上。
+- **建议输出模板**:
 
-  ```md
-  ## 📘 单元学习向导：[AI根据单元标题自动生成单元主题，如：基础问候与自我介绍]
+```md
+## ✅ 本课主题
 
-  ### 一、学习目标 (Learning Objectives)
+**【填写课程主题】**  
+（例如：自我介绍 / 点餐 / 打电话 / 交通出行）
 
-  本单元结束后，你将能够：
+---
 
-  - **交际能力**: [AI根据句型自动分析，如：使用基础句型进行自我介绍并询问他人姓名]。
-  - **词汇应用**: [AI根据词汇自动分析，如：掌握并运用...等与个人信息相关的核心词汇]。
-  - **基础语法**: [AI自动分析，如：理解并使用be动词的基本陈述句形式]。
+## 🎯 本课学习目标（What You Will Learn）
 
-  ### 二、核心词汇与句型解析 (Core Vocabulary & Sentence Breakdown)
+- 【目标1】（例如：能用be动词介绍自己）
+- 【目标2】（例如：掌握5个职业单词）
+- 【目标3】（例如：能理解并回答“How are you?”）
 
-  - **核心词汇 (Core Vocabulary)**:
-    - **word1** (`/IPA发音/`): [词性] [中文释义]。例: `...`
-    - **word2** (`/IPA发音/`): [词性] [中文释义]。例: `...`
-  - **实用句型 (Practical Sentences)**:
-    - **句型1**: `...`
-      - **结构解析**: [简要说明句子结构，如：这是一个主语+be动词+表语的基本结构]。
-      - **使用场景**: [说明在何种真实情境下使用，如：用于初次见面时介绍自己]。
-    - **句型2**: `...`
+---
 
-  ### 三、语法要点与实用技巧 (Grammar Focus & Practical Tips)
+## 🧠 语法知识点（Grammar Focus）
 
-  - **语法要点**: [AI根据本单元内容提炼最核心的1-2个语法点，用最简单的话解释清楚。例如：Be动词的用法：I用am, you用are...]
-  - **发音提示**: [针对易错发音的单词进行提示，如："thank"中的th发音技巧]。
-  - **文化小贴士**: [提供与本单元内容相关的实用文化背景，如：西方人初次见面时通常会握手并进行眼神交流]。
+### 🔹【语法点1】
 
-  ### 四、学习与应用建议 (Study & Application Suggestions)
+说明：  
+示例句：
 
-  - **开口练习**: 不用怕犯错，尝试对着镜子或使用手机录音，大声朗读核心句型。
-  - **情景模拟**: 想象一个真实场景（如在咖啡店），在脑海中或与伙伴一起演练本单元的对话。
-  - **碎片化学习**: 将核心单词和句型写在便签上，贴在显眼的地方，利用零碎时间巩固记忆。
-  ```
+### 🔹【语法点2】
+
+说明：  
+示例句：
+
+✏️ **学习提示：**【简明规则或记忆口诀】
+
+---
+
+## 📚 常见词汇（Key Vocabulary）
+
+| 中文           | 英文     | 可选读音      |
+| -------------- | -------- | ------------- |
+| 【示例：学生】 | student  | ['stju:dənt]  |
+| 【词汇2】      | 【英文】 | 【音标/拼读】 |
+| 【词汇3】      | 【英文】 | 【音标/拼读】 |
+
+✍️ 建议练写并朗读以上单词。
+
+---
+
+## ⚠️ 易错点提醒（Common Mistakes）
+
+| 错误用法 ❌               | 正确用法 ✅      |
+| ------------------------- | ---------------- |
+| 【例：He are a teacher.】 | He is a teacher. |
+| 【错误句】                | 【正确句】       |
+
+🧠 小贴士：【简要说明错误原因】
+
+---
+
+## 🌍 文化与生活小知识（Language & Culture Tip）
+
+- 【例：打招呼“Hi” 与 “Hello” 的使用场景】
+- 【例：外国点餐更常说 “Can I have...” 而非 “Give me...”】
+- 【例：西方写日期方式是 月/日/年】
+
+---
+
+## 💬 信心鼓励（Encouragement）
+
+> “【鼓励语句，例如：每句话你说出口，都是向前的一步】”
+
+✅ 不怕说错，只怕不开口。你能行！
+```
+
+### **第二部分：听力素材 (纯文本)**
+
+- **核心要求**：生成 **10 组简短的、独立的问答式对话或陈述句**。
+- **内容指引**：
+  - 对话必须模拟**成人日常生活或工作中的真实、高频场景**。
+  - 高频复现核心单词和句型，语言简洁、语速适中（想象为录音稿）。
+  - **为听力选择题做准备**: 包含一些易混淆的单词或相似场景。
+- **格式**: 将生成的纯文本对话放入一个 `txt...` 代码块中。
 
 ### **第三部分：抄写练习 (JSON格式)**
 
 - **要求**：
-  - 生成一个JSON对象，严格符合提供的 `Unit Schema` 格式。
-  - `word_copy` 必须包含所有核心单词。
-  - `sentence_copy` 包含核心句型。
-  - `sentence_transform` 应基于核心句型进行**成人学习者需要的实用变换**，如陈述句转为一般疑问句、否定句，或进行人称替换。
-- **格式**: 将生成的JSON对象放入一个 `json ... ` 代码块中。
+
+  - 生成一个JSON对象，严格符合提供的 `Unit Schema` 格式。
+
+  - `word_copy` 必须包含所有核心单词。
+
+  - `sentence_copy` 包含核心句型。
+
+  - `sentence_transform` 应基于核心句型进行**成人学习者需要的实用变换**，如陈述句转为一般疑问句、否定句，或进行人称替换。
+
+- **格式**: 将生成的JSON对象放入一个 `json ... ` 代码块中，但是注意生成json对象而不是JSON Schema。
 
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+
   "title": "Unit Schema",
+
   "type": "object",
+
   "properties": {
     "title": { "type": "string" },
+
     "word_copy": { "type": "array", "items": { "type": "string" } },
+
     "sentence_copy": { "type": "array", "items": { "type": "string" } },
+
     "sentence_transform": { "type": "array", "items": { "type": "string" } }
   },
+
   "required": ["title", "word_copy", "sentence_copy", "sentence_transform"]
 }
 ```
 
 ### **第四部分：单元试卷 (JSON格式)**
 
-- **要求**：
+- **核心要求**:
 
-  - 生成一个包含 **20-25道题** 的JSON对象（题量适中，避免给初学者太大压力），严格符合下面提供的 EnglishExamSheet Schema。
-  - **听力题严格约束**：所有听力题必须源自第一部分生成的**成人情景对话**。
-  - 试卷的题目设计应**高度实用**，模拟成人在真实世界中可能遇到的语言任务（如看懂简单菜单、填写表格信息、理解简短的指示等）。
-  - 所有题目必须有唯一的 id。
+  - 生成一个包含 **40-50道题** 的JSON对象，严格符合下方提供的 `EnglishExamSheet` Schema。
+  - **序号重置规则**: 每一个大题 (`section`) 内部的题目序号，都必须从 **1** 开始重新计数。这个序号要直接体现在`questionText`或`text`字段中。 (例如: "1. ...", "2. ...")
+  - **题型分布**: 严格按照下面列出的8种题型和数量进行生成。
 
-- **格式**: 将生成的JSON对象放入一个 json ... 代码块中。
+- **题型结构规划**:
+
+  1. **I. 听力理解 (Listening Comprehension)**: 约10题, `MULTI_SELECT_CHOICE`。题干为听力内容，选项为A/B/C/D四个单词。
+  2. **II. 单词拼写 (Word Spelling)**: 约6题, `FILL_IN_BLANK`。题干包含下划线和中文释义，要求填写完整单词。
+  3. **III. 词汇选择 (Vocabulary Choice)**: 约5题, `MULTI_SELECT_CHOICE`。单句或简短对话，选择最合适的单词填空。
+  4. **IV. 语法选择 (Grammar Choice)**: 约5题, `MULTI_SELECT_CHOICE`。选择正确的语法形式或句子结构。
+  5. **V. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`。选择最合适的句子补全对话。
+  6. **VI. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`。短文放在 `section.instructions` 中，然后提出5个选择题。
+  7. **VII. 句子改错 (Error Correction)**: 约6题, `OPEN_ENDED`。题干为一个错误的句子，要求写出正确的句子。
+  8. **VIII. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`。题干提供若干单词，要求用它们造一个完整的句子。
+
+- **格式**: 将生成的JSON对象放入一个 `json ...` 代码块中。
 
   ```json
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "中小学英语试卷结构定义",
-    "description": "一个为定义结构化英语试卷内容设计的灵活 Schema，专为前端应用渲染优化。",
+    "title": "中小学英语试卷结构定义 (V2.0-条件式校验)",
+    "description": "一个使用条件式校验 (if-then) 彻底解决 oneOf 冲突的、与前端类型定义完全对齐的最终版 Schema。",
     "type": "object",
     "properties": {
       "title": { "type": "string" },
@@ -156,7 +244,7 @@
           "instructions": { "type": "string" },
           "parts": { "type": "array", "items": { "$ref": "#/$defs/part" } }
         },
-        "required": ["title", "parts"]
+        "required": ["sectionNumber", "title", "parts"]
       },
       "part": {
         "type": "object",
@@ -165,102 +253,129 @@
           "instructions": { "type": "string" },
           "content": {
             "type": "array",
-            "items": {
-              "oneOf": [
-                { "$ref": "#/$defs/content/wordBank" },
-                { "$ref": "#/$defs/content/matching" },
-                { "$ref": "#/$defs/content/passage" },
-                { "$ref": "#/$defs/content/question" }
-              ]
-            }
+            "items": { "$ref": "#/$defs/question" }
           }
         },
         "required": ["content"]
       },
-      "content": {
-        "wordBank": {
-          "type": "object",
-          "properties": {
-            "type": { "const": "WORD_BANK" },
-            "label": { "type": "string" },
-            "words": { "type": "array", "items": { "type": "string" } }
+      "question": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "QUESTION" },
+          "questionType": {
+            "type": "string",
+            "enum": [
+              "MULTI_SELECT_CHOICE",
+              "TRUE_FALSE",
+              "FILL_IN_BLANK",
+              "OPEN_ENDED",
+              "GUIDED_WRITING"
+            ]
           },
-          "required": ["type", "words"]
+          "data": { "type": "object" }
         },
-        "matching": {
-          "type": "object",
-          "properties": {
-            "type": { "const": "MATCHING" },
-            "stems": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": { "type": "string" },
-                  "text": { "type": "string" }
-                }
+        "required": ["type", "questionType", "data"],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "questionType": { "const": "MULTI_SELECT_CHOICE" }
               }
             },
-            "options": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": { "type": "string" },
-                  "text": { "type": "string" }
-                }
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/questionData/multiSelectChoice" }
               }
             }
           },
-          "required": ["type", "stems", "options"]
-        },
-        "passage": {
+          {
+            "if": {
+              "properties": { "questionType": { "const": "TRUE_FALSE" } }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/questionData/trueFalse" }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": { "questionType": { "const": "FILL_IN_BLANK" } }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/questionData/fillInBlank" }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "questionType": { "enum": ["OPEN_ENDED", "GUIDED_WRITING"] }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/questionData/openEnded" }
+              }
+            }
+          }
+        ]
+      },
+      "questionData": {
+        "multiSelectChoice": {
           "type": "object",
           "properties": {
-            "type": { "const": "READING_PASSAGE" },
+            "id": { "type": "string" },
+            "questionText": { "type": "string" },
+            "options": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["id", "questionText", "options"]
+        },
+        "trueFalse": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "questionText": { "type": "string" }
+          },
+          "required": ["id", "questionText"]
+        },
+        "fillInBlank": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
             "text": { "type": "string" }
           },
-          "required": ["type", "text"]
+          "required": ["id", "text"]
         },
-        "question": {
+        "openEnded": {
           "type": "object",
           "properties": {
-            "type": { "const": "QUESTION" },
-            "questionType": {
-              "type": "string",
-              "enum": [
-                "FILL_IN_BLANK_AND_TRANSLATE",
-                "FILL_IN_BLANK",
-                "TRANSLATE_ZH_TO_EN",
-                "GUIDED_WRITING",
-                "MULTI_SELECT_CHOICE",
-                "TRUE_FALSE",
-                "OPEN_ENDED"
-              ]
-            },
-            "data": { "type": "object" }
+            "id": { "type": "string" },
+            "text": { "type": "string" }
           },
-          "required": ["type", "questionType", "data"]
+          "required": ["id", "text"]
         }
       }
     }
   }
   ```
 
-  ### **第五部分：试卷答案 (JSON格式)**
+### **第五部分：试卷答案 (JSON格式)**
 
-  - **要求**：
+- **要求**：
 
-    - 生成一个JSON对象，严格符合下面提供的 EnglishExamAnswerSheet Schema。
-    - 答案中的所有 id 和结构必须与第四部分生成的试卷**完全对应**。
+  - 生成一个JSON对象，严格符合下面提供的 `EnglishExamAnswerSheet` Schema。
+  - 答案对象的核心是 `id` 到 `answer` 的直接映射，结构必须保持扁平、简洁。
+  - 所有 `id` 必须与第四部分生成的试卷中的题目ID**完全对应**。
 
-  - **格式**: 将生成的JSON对象放入一个 json ... 代码块中。
+- **格式**: 将生成的JSON对象放入一个 `json ...` 代码块中。
 
   ```json
   {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "英语试卷答案结构定义",
-    "description": "一个与试卷结构完全匹配的答案 Schema，用于存储参考答案和评分标准，支持自动批改。",
+    "title": "英语试卷答案结构定义 (V2.0)",
+    "description": "一个简洁、高效的答案 Schema，专为自动批改设计。",
     "type": "object",
     "properties": {
       "paperId": { "type": "string" },
@@ -280,7 +395,8 @@
             "type": "array",
             "items": { "$ref": "#/$defs/answerPart" }
           }
-        }
+        },
+        "required": ["sectionNumber", "parts"]
       },
       "answerPart": {
         "type": "object",
@@ -288,40 +404,24 @@
           "partNumber": { "type": "string" },
           "content": {
             "type": "array",
-            "items": {
-              "oneOf": [
-                { "$ref": "#/$defs/answeredMatching" },
-                { "$ref": "#/$defs/answeredQuestion" }
-              ]
-            }
-          }
-        }
-      },
-      "answeredMatching": {
-        "type": "object",
-        "properties": {
-          "type": { "const": "MATCHING" },
-          "answer": {
-            "type": "object",
-            "additionalProperties": { "type": "string" }
+            "items": { "$ref": "#/$defs/answeredQuestion" }
           }
         },
-        "required": ["type", "answer"]
+        "required": ["content"]
       },
       "answeredQuestion": {
         "type": "object",
         "properties": {
-          "type": { "const": "QUESTION" },
-          "questionType": { "type": "string" },
+          "id": { "type": "string" },
           "answer": {
             "oneOf": [
-              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } },
               { "type": "boolean" },
-              { "type": "array", "items": { "type": "string" } }
+              { "type": "string" }
             ]
           }
         },
-        "required": ["type", "questionType", "answer"]
+        "required": ["id", "answer"]
       }
     }
   }

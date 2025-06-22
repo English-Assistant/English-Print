@@ -30,10 +30,10 @@ function Answer() {
 
   return (
     <div className="w-[794px] mx-auto pt-8 pb-20 print:w-[210mm] print:min-h-[297mm] flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-blue-900 text-center">
+      <h1 className="text-[24px] leading-8 font-bold text-blue-800 text-center">
         英语考试答案卡
       </h1>
-      <div className="border-t border-gray-300 w-[730px] mx-auto" />
+      <hr className="border-gray-300 w-[730px] mx-auto" />
 
       {/* 答案主体 */}
       <AnswerSheetViewer exam={exam} answer={answerSheet} />

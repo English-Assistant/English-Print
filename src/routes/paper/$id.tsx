@@ -28,22 +28,22 @@ function ExamPaperPage() {
   }
 
   return (
-    <div className="w-[794px] mx-auto pt-8 pb-32 print:w-[210mm] print:min-h-[297mm]">
+    <div className="w-[794px] mx-auto pt-8 pb-32 print:w-[210mm] print:min-h-[297mm] flex flex-col gap-2">
       {/* 试卷标题及学生信息 */}
-      <h1 className="text-2xl font-bold text-blue-900 text-center">
+      <h1 className="text-[24px] leading-8 font-bold text-blue-800 text-center">
         {examPaper.title || 'English Examination'}
       </h1>
-      <div className="flex items-center gap-12 mt-2 text-gray-600 font-medium">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-8 text-gray-700 font-medium px-12">
+        <div className="flex gap-2 items-baseline" style={{ minWidth: 260 }}>
           <span>Student Name:</span>
-          <span className="inline-block border-b border-gray-400 w-40" />
+          <span className="border-b border-gray-400 inline-block min-w-[160px]" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2 items-baseline">
           <span>Date:</span>
-          <span className="inline-block border-b border-gray-400 w-32" />
+          <span className="border-b border-gray-400 inline-block min-w-[128px]" />
         </div>
       </div>
-      <div className="border-t border-gray-300 my-2" />
+      <hr className="border-gray-300 w-[730px] mx-auto" />
 
       {/* 试卷正文 */}
       <ExamPaperViewer paper={examPaper} />

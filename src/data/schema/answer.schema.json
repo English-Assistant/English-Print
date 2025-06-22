@@ -1,121 +1,53 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "英语试卷答案结构定义",
-  "description": "一个与试卷结构完全匹配的答案 Schema，用于存储参考答案和评分标准，支持自动批改。",
+  "title": "英语试卷答案结构定义 (V2.0)",
+  "description": "一个简洁、高效的答案 Schema，专为自动批改设计。",
   "type": "object",
   "properties": {
-    "paperId": {
-      "type": "string",
-      "description": "对应试卷的唯一ID，确保答案和试卷能精确匹配。"
-    },
-    "title": {
-      "type": "string",
-      "description": "试卷的标题（可选，用于核对）。"
-    },
+    "paperId": { "type": "string" },
+    "title": { "type": "string" },
     "sections": {
       "type": "array",
-      "description": "答案按试卷的大题结构组织。",
-      "items": {
-        "$ref": "#/$defs/answerSection"
-      }
+      "items": { "$ref": "#/$defs/answerSection" }
     }
   },
-  "required": [
-    "paperId",
-    "sections"
-  ],
+  "required": ["paperId", "sections"],
   "$defs": {
     "answerSection": {
       "type": "object",
       "properties": {
-        "sectionNumber": {
-          "type": "string"
-        },
+        "sectionNumber": { "type": "string" },
         "parts": {
           "type": "array",
-          "items": {
-            "$ref": "#/$defs/answerPart"
-          }
+          "items": { "$ref": "#/$defs/answerPart" }
         }
-      }
+      },
+      "required": ["sectionNumber", "parts"]
     },
     "answerPart": {
       "type": "object",
       "properties": {
-        "partNumber": {
-          "type": "string"
-        },
+        "partNumber": { "type": "string" },
         "content": {
           "type": "array",
-          "items": {
-            "oneOf": [
-              {
-                "$ref": "#/$defs/answeredMatching"
-              },
-              {
-                "$ref": "#/$defs/answeredQuestion"
-              }
-            ]
-          }
-        }
-      }
-    },
-    "answeredMatching": {
-      "type": "object",
-      "description": "对整个匹配题提供答案。",
-      "properties": {
-        "type": {
-          "const": "MATCHING"
-        },
-        "answer": {
-          "type": "object",
-          "description": "以键值对形式提供匹配关系，键是题干ID，值是选项ID。",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "items": { "$ref": "#/$defs/answeredQuestion" }
         }
       },
-      "required": [
-        "type",
-        "answer"
-      ]
+      "required": ["content"]
     },
     "answeredQuestion": {
       "type": "object",
-      "description": "对单个问题提供答案。",
       "properties": {
-        "type": {
-          "const": "QUESTION"
-        },
-        "questionType": {
-          "type": "string"
-        },
+        "id": { "type": "string" },
         "answer": {
-          "description": "答案的具体内容，其类型取决于问题类型。",
           "oneOf": [
-            {
-              "type": "string",
-              "description": "用于填空、翻译、简答等。"
-            },
-            {
-              "type": "boolean",
-              "description": "用于判断题。"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "用于多选题或有多个可能答案的开放题。"
-            }
+            { "type": "array", "items": { "type": "string" } },
+            { "type": "boolean" },
+            { "type": "string" }
           ]
         }
       },
-      "required": [
-        "type",
-        "questionType",
-        "answer"
-      ]
+      "required": ["id", "answer"]
     }
   }
 }
