@@ -30,7 +30,7 @@ function ExamPaperPage() {
 
   let examPaper: ExamPaper;
   try {
-    examPaper = paperRecord.examJson as unknown as ExamPaper;
+    examPaper = paperRecord.examJson;
   } catch (err) {
     console.error(err);
     return <div className="p-6 text-red-600">试卷 JSON 解析失败</div>;
@@ -66,5 +66,5 @@ function ExamPaperPage() {
         </footer>
       </div>
     </div>
-  )
+  );
 }

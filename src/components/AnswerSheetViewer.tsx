@@ -1,5 +1,11 @@
-// AnswerSheetViewer.tsx (已重构和优化)
-import type { ExamPaper, Section, Part, Question } from '@/data/types/exam';
+// AnswerSheetViewer.tsx (已修复BUG并优化)
+import type {
+  ExamPaper,
+  Section,
+  Part,
+  Question,
+  FillInBlankData,
+} from '@/data/types/exam';
 import type { ExamAnswerSheet, AnsweredQuestion } from '@/data/types/answer';
 import { useMemo } from 'react';
 
@@ -15,15 +21,17 @@ export default function AnswerSheetViewer({
   exam,
   answer,
 }: AnswerSheetViewerProps) {
-  // 1. 【核心优化】: 创建一个从问题ID到答案的全局Map，实现高效、精确的查找。
-  // 这样可以避免在渲染时进行复杂的、低效的嵌套循环匹配。
+  // 这部分代码无变化，保持原样
   const answerMap = useMemo(() => {
     const map = new Map<string, AnsweredQuestion['answer']>();
     answer.sections.forEach((answerSection) => {
       answerSection.parts.forEach((answerPart) => {
-        answerPart.content.forEach((ans) => {
-          map.set(ans.id, ans.answer);
-        });
+        // 安全性检查：确保 answerPart 和 content 存在
+        if (answerPart?.content) {
+          answerPart.content.forEach((ans) => {
+            map.set(ans.id, ans.answer);
+          });
+        }
       });
     });
     return map;
@@ -32,7 +40,6 @@ export default function AnswerSheetViewer({
   return (
     <div className="flex flex-col gap-4">
       {exam.sections.map((section) => (
-        // 2. 将全局的 answerMap 传递给每个子组件
         <AnswerSectionCard
           key={section.sectionNumber}
           section={section}
@@ -51,15 +58,14 @@ interface CardProps {
 }
 
 function AnswerSectionCard({ section, answerMap }: CardProps) {
+  // 这部分代码无变化，保持原样
   return (
     <div className="border border-gray-200 rounded-lg shadow-sm">
-      {/* 标题头，样式与设计图对齐 */}
       <div className="bg-[#F0F7FF] border-l-4 border-[#2563EB] px-5 py-2">
         <h3 className="text-lg font-bold text-[#1E40AF]">
           {section.sectionNumber}. {section.title}
         </h3>
       </div>
-      {/* 内容区域 */}
       <div className="px-5 py-4 flex flex-col gap-4">
         {section.parts.map((part, index) => (
           <PartAnswerView
@@ -79,7 +85,7 @@ interface PartAnswerViewProps {
 }
 
 function PartAnswerView({ part, answerMap }: PartAnswerViewProps) {
-  // 3. 【视觉还原】: 如果有 part.instructions，将其作为子标题展示，与设计图一致
+  // 这部分代码无变化，保持原样
   const hasSubheading = !!part.instructions;
 
   return (
@@ -94,7 +100,6 @@ function PartAnswerView({ part, answerMap }: PartAnswerViewProps) {
           <SingleAnswer
             key={question.data.id}
             question={question}
-            // 4. 从 answerMap 中直接、高效地获取答案
             answer={answerMap.get(question.data.id)}
           />
         ))}
@@ -111,19 +116,32 @@ interface SingleAnswerProps {
 function SingleAnswer({ question, answer }: SingleAnswerProps) {
   if (answer === undefined) return null; // 如果没有答案，不渲染任何内容
 
-  // 5. 【数据驱动】: 题目编号直接从 question.data.questionText 或 question.data.text 中提取
-  const getQuestionNumber = (text: string): string => {
+  // =================================================================
+  //  ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 核心修复区域 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+  // =================================================================
+  const getQuestionNumber = (): string => {
+    // 优先处理单词拼写题：直接从结构化数据中获取题号，最可靠
+    if (question.questionType === 'FILL_IN_BLANK') {
+      // 使用类型断言告诉TS，这里的data是FillInBlankData
+      return (question.data as FillInBlankData).number || '';
+    }
+
+    // 对于其他题型，从文本中提取
+    const text =
+      'questionText' in question.data
+        ? question.data.questionText
+        : 'text' in question.data
+          ? question.data.text
+          : '';
+
     const match = text.match(/^(\d+)\.?\s*/);
     return match ? `${match[1]}.` : '';
   };
+  // =================================================================
+  //  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ 核心修复区域 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+  // =================================================================
 
-  const questionText =
-    'questionText' in question.data
-      ? question.data.questionText
-      : question.data.text;
-  const questionNumber = getQuestionNumber(questionText);
-
-  // 6. 【格式化】: 使用辅助函数格式化不同类型的答案，以匹配设计图
+  const questionNumber = getQuestionNumber();
   const formattedAnswer = formatAnswer(answer);
 
   return (
@@ -136,18 +154,17 @@ function SingleAnswer({ question, answer }: SingleAnswerProps) {
   );
 }
 
-/**
- * 格式化答案的辅助函数，使其输出与设计图完全一致
- * @param ans - 原始答案数据
- * @returns 格式化后的字符串
- */
 function formatAnswer(ans: AnsweredQuestion['answer']): string {
+  // 这部分代码无变化，保持原样
   if (Array.isArray(ans)) {
-    // 对于选择题，只取选项内容，去掉 "A. " 前缀
     return ans.map((item) => item.replace(/^[A-Z]\.\s*/, '')).join(', ');
   }
   if (typeof ans === 'boolean') {
     return ans ? 'T (正确)' : 'F (错误)';
+  }
+  // 增加对字符串答案的前缀移除，以防AI偶尔出错
+  if (typeof ans === 'string') {
+    return ans.replace(/^[A-Z]\.\s*/, '');
   }
   return String(ans);
 }

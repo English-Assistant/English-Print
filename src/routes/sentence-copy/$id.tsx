@@ -16,14 +16,7 @@ function SentenceCopy() {
     return <div className="p-6">未找到试卷</div>;
   }
 
-  type CopyJson = {
-    word_copy: string[];
-    sentence_copy: string[];
-    sentence_transform?: string[];
-    title: string;
-  };
-
-  const data = paper.copyJson as CopyJson | undefined;
+  const data = paper.copyJson;
 
   if (!data) return <div className="p-6">暂无抄写数据</div>;
 

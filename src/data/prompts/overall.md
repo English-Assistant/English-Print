@@ -207,19 +207,31 @@
 - **核心要求**:
 
   - 生成一个包含 **40-50道题** 的JSON对象，严格符合下方提供的 `EnglishExamSheet` Schema。
-  - **序号重置规则**: 每一个大题 (`section`) 内部的题目序号，都必须从 **1** 开始重新计数。这个序号要直接体现在`questionText`或`text`字段中。 (例如: "1. ...", "2. ...")
-  - **题型分布**: 严格按照下面列出的8种题型和数量进行生成。
+  - **【强制指令】**: 每一个大题 (`section`) 内部的题目，其题干（即`questionText`或`text`字段）**必须以 '序号. ' 开头** (例如: "1. ", "2. ", "3. ")。请确保**所有题型**（包括选择题、判断题、改错题、造句题等）都严格遵循此规则。
+  - **【重要内容指令】**: 所有提供给学生阅读的 `title` 和 `instructions` 字段，都必须是 **"中文标题 (English Title)"** 或 **"中文说明 (English Instruction)"** 的格式，确保中英双语对照。
+  - **序号重置规则**: 每一个大题 (`section`) 内部的题目序号，都必须从 **1** 开始重新计数。
 
-- **题型结构规划**:
+- **题型结构规划 (已更新为9个部分)**:
 
-  1. **I. 听力理解 (Listening Comprehension)**: 约10题, `MULTI_SELECT_CHOICE`。题干为听力内容，选项为A/B/C/D四个单词。
-  2. **II. 单词拼写 (Word Spelling)**: 约6题, `FILL_IN_BLANK`。题干包含下划线和中文释义，要求填写完整单词。
-  3. **III. 词汇选择 (Vocabulary Choice)**: 约5题, `MULTI_SELECT_CHOICE`。单句或简短对话，选择最合适的单词填空。
-  4. **IV. 语法选择 (Grammar Choice)**: 约5题, `MULTI_SELECT_CHOICE`。选择正确的语法形式或句子结构。
-  5. **V. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`。选择最合适的句子补全对话。
-  6. **VI. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`。短文放在 `section.instructions` 中，然后提出5个选择题。
-  7. **VII. 句子改错 (Error Correction)**: 约6题, `OPEN_ENDED`。题干为一个错误的句子，要求写出正确的句子。
-  8. **VIII. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`。题干提供若干单词，要求用它们造一个完整的句子。
+  1. **I. 听力理解 (Listening Comprehension)**: 约10题, `MULTI_SELECT_CHOICE`。
+  2. **II. 单词拼写 (Word Spelling)**: 约6题, `FILL_IN_BLANK`。
+     - **【！！！最重要结构指令！！！】**: 对于此题型，`data` 对象必须严格遵守以下规则：
+       - `"number"`: 字符串类型，表示题号，如 `"1."`。
+       - `"hint"`: 字符串类型，表示中文提示，如 `"春天"`。
+       - `"stem"`: 字符串类型，**严格要求只包含单词的首字母，不能包含任何其他字符。**
+     - **【！！！反面教材！！！】**: **严禁在`stem`字段中包含任何下划线 `_` 或其他占位符。**
+       - **正确示例 (Correct Example):** `{"stem": "s"}`
+       - **错误示例 (Incorrect Example):** `{"stem": "s _ _ _ _ _"}` 或 `{"stem": "s____g"}`
+  3. **III. 判断题 (True/False)**: **约5题, `TRUE_FALSE`。题干为一个陈述句，要求学生判断正误。**
+  4. **IV. 词汇选择 (Vocabulary Choice)**: 约5题, `MULTI_SELECT_CHOICE`。
+     - **【！！！最重要选项指令！！！】**: 对于所有`MULTI_SELECT_CHOICE`题型，其`options`数组中的每个字符串**严禁包含**任何'A.'、'B.'、'C.'之类的前缀。选项必须是纯净的文本。
+       - **正确示例 (Correct Example):** `["Spring", "Summer", "Winter"]`
+       - **错误示例 (Incorrect Example):** `["A. Spring", "B. Summer", "C. Winter"]`
+  5. **V. 语法选择 (Grammar Choice)**: 约5题, `MULTI_SELECT_CHOICE`。
+  6. **VI. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`。
+  7. **VII. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`。
+  8. **VIII. 句子改错 (Error Correction)**: 约6题, `OPEN_ENDED`。
+  9. **IX. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`。
 
 - **格式**: 将生成的JSON对象放入一个 `json ...` 代码块中。
 
@@ -342,11 +354,20 @@
         },
         "fillInBlank": {
           "type": "object",
+          "description": "单词拼写题的结构化数据",
           "properties": {
             "id": { "type": "string" },
-            "text": { "type": "string" }
+            "number": { "type": "string", "description": "题号，例如 '1.'" },
+            "hint": {
+              "type": "string",
+              "description": "中文提示，例如 '春天'"
+            },
+            "stem": {
+              "type": "string",
+              "description": "单词的词干或首字母，例如 's'"
+            }
           },
-          "required": ["id", "text"]
+          "required": ["id", "number", "hint", "stem"]
         },
         "openEnded": {
           "type": "object",
@@ -364,11 +385,13 @@
 ### **第五部分：试卷答案 (JSON格式)**
 
 - **要求**：
-
-  - 生成一个JSON对象，严格符合下面提供的 `EnglishExamAnswerSheet` Schema。
-  - 答案对象的核心是 `id` 到 `answer` 的直接映射，结构必须保持扁平、简洁。
-  - 所有 `id` 必须与第四部分生成的试卷中的题目ID**完全对应**。
-
+  - **【强制】ID完全对应**: 答案JSON中每个问题的`id`，必须与**第四部分生成的试卷中**对应问题的`id`**完全一致**。
+  - **【强制】结构完全对应**: 答案的`sections`和`parts`结构必须与试卷完全一致。如果试卷的`part`有`partNumber`字段，答案的`part`也必须有相同的`partNumber`字段。如果试卷的`part`没有`partNumber`，则答案中也省略此字段。
+  - **【强制】答案格式**: 必须根据试卷中的`questionType`来确定`answer`字段的数据类型和内容：
+    - **选择题 (MULTI_SELECT_CHOICE)**: `answer`为正确选项的**字符串**，如 `"Spring"`。
+    - **判断题 (TRUE_FALSE)**: `answer`为**布尔值**，`true` 或 `false`。
+    - **填空题 (FILL_IN_BLANK)**: `answer`为完整的单词**字符串**，如 `"spring"`。
+    - **开放/造句题 (OPEN_ENDED/GUIDED_WRITING)**: `answer`为完整的句子**字符串**。
 - **格式**: 将生成的JSON对象放入一个 `json ...` 代码块中。
 
   ```json

@@ -1,8 +1,8 @@
-// exam.d.ts (V2.0 - 与新Prompt完全对齐)
+// src/data/types/exam.ts (已清理)
 
 /**
  * @file
- * @description 定义了中小学英语试卷的完整数据结构 (V2.0)。
+ * @description 定义了中小学英语试卷的完整数据结构 (V2.1)。
  * 该结构专为前端动态渲染而设计，具有高度的灵活性和扩展性。
  */
 
@@ -28,7 +28,7 @@ export interface Part {
   content: Question[];
 }
 
-// 【核心变更】问题的具体类型枚举，与新Prompt的Schema保持一致
+// 问题的具体类型枚举
 export type QuestionType =
   | 'MULTI_SELECT_CHOICE' // 选择题 (听力、词汇、语法、情景、阅读)
   | 'TRUE_FALSE' // 判断题 (如果未来需要)
@@ -43,7 +43,7 @@ export interface Question {
   data: QuestionData;
 }
 
-// 【核心变更】所有问题数据类型的联合类型，结构简化
+// 所有问题数据类型的联合类型
 export type QuestionData =
   | MultiSelectChoiceData
   | TrueFalseData
@@ -63,27 +63,18 @@ export interface TrueFalseData {
   questionText: string;
 }
 
-// 单词拼写/填空题的数据结构
+/**
+ * 单词拼写/填空题的数据结构 (V2.1 结构化版本)
+ */
 export interface FillInBlankData {
   id: string;
-  text: string;
+  number: string; // 题号，如 "1."
+  hint: string; // 中文提示，如 "春天"
+  stem: string; // 词干/首字母，如 "s"
 }
 
 // 句子改错/造句等开放性题目的数据结构
 export interface OpenEndedData {
   id: string;
   text: string;
-}
-
-export interface Paper {
-  id: string;
-  title: string;
-  courseId?: string;
-  remark?: string;
-  sections?: string[];
-  preclass?: string;
-  copyJson?: Record<string, unknown>;
-  examJson?: Record<string, unknown>;
-  answerJson?: Record<string, unknown>;
-  updatedAt: string;
 }

@@ -116,11 +116,17 @@
       },
       "fillInBlank": {
         "type": "object",
+        "description": "单词拼写题的结构化数据",
         "properties": {
           "id": { "type": "string" },
-          "text": { "type": "string" }
+          "number": { "type": "string", "description": "题号，例如 '1.'" },
+          "hint": { "type": "string", "description": "中文提示，例如 '春天'" },
+          "stem": {
+            "type": "string",
+            "description": "单词的词干或首字母，例如 's'"
+          }
         },
-        "required": ["id", "text"]
+        "required": ["id", "number", "hint", "stem"]
       },
       "openEnded": {
         "type": "object",

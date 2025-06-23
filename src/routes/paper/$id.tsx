@@ -21,7 +21,7 @@ function ExamPaperPage() {
 
   let examPaper: ExamPaper;
   try {
-    examPaper = paperRecord.examJson as unknown as ExamPaper;
+    examPaper = paperRecord.examJson;
   } catch (err) {
     console.error(err);
     return <div className="p-6 text-red-600">试卷 JSON 解析失败</div>;
@@ -33,7 +33,7 @@ function ExamPaperPage() {
       <h1 className="text-[24px] leading-8 font-bold text-blue-800 text-center">
         {examPaper.title || 'English Examination'}
       </h1>
-      <div className="flex items-center gap-8 text-gray-700 font-medium px-12">
+      <div className="flex items-center gap-8 text-gray-700 font-medium px-12 my-4 justify-center">
         <div className="flex gap-2 items-baseline" style={{ minWidth: 260 }}>
           <span>Student Name:</span>
           <span className="border-b border-gray-400 inline-block min-w-[160px]" />
@@ -47,11 +47,6 @@ function ExamPaperPage() {
 
       {/* 试卷正文 */}
       <ExamPaperViewer paper={examPaper} />
-
-      {/* 页脚 */}
-      <footer className="mt-6 border-t border-gray-200 text-center text-gray-500 pt-4">
-        Page 1 of 1
-      </footer>
     </div>
   );
 }

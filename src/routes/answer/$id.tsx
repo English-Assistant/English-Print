@@ -21,8 +21,8 @@ function Answer() {
   let exam: ExamPaper;
   let answerSheet: ExamAnswerSheet;
   try {
-    exam = paper.examJson as unknown as ExamPaper;
-    answerSheet = paper.answerJson as unknown as ExamAnswerSheet;
+    exam = paper.examJson;
+    answerSheet = paper.answerJson;
   } catch (err) {
     console.error(err);
     return <div className="p-6 text-red-600">答案 JSON 解析失败</div>;
@@ -31,7 +31,7 @@ function Answer() {
   return (
     <div className="w-[794px] mx-auto pt-8 pb-20 print:w-[210mm] print:min-h-[297mm] flex flex-col gap-4">
       <h1 className="text-[24px] leading-8 font-bold text-blue-800 text-center">
-        英语考试答案卡
+        {paper.answerJson.title}
       </h1>
       <hr className="border-gray-300 w-[730px] mx-auto" />
 
