@@ -1,10 +1,24 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Input, Button, Card, Tag, Row, Col, message, Empty } from 'antd';
+import {
+  Input,
+  Button,
+  Card,
+  Tag,
+  Row,
+  Col,
+  message,
+  Empty,
+  theme,
+  Typography,
+  Space,
+  Popconfirm,
+} from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
-  SearchOutlined,
   EditOutlined,
+  ClockCircleOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useState } from 'react';
@@ -20,6 +34,7 @@ function PaperManagement() {
   const { courses } = useCourseStore();
   const [keyword, setKeyword] = useState('');
   const [open, setOpen] = useState(false);
+  const { token } = theme.useToken();
 
   const filtered = papers.filter((p) =>
     p.title.toLowerCase().includes(keyword.toLowerCase()),
@@ -31,83 +46,136 @@ function PaperManagement() {
   };
 
   return (
-    <div className="p-6 flex flex-col gap-6">
-      <h2 className="text-2xl font-semibold text-gray-800">试卷管理</h2>
-      <div className="flex justify-between flex-wrap gap-4">
-        <Input
-          allowClear
-          placeholder="搜索试卷"
-          prefix={<SearchOutlined className="text-gray-400" />}
-          style={{ width: 300 }}
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setOpen(true)}
-        >
-          新建
-        </Button>
-      </div>
-      {filtered.length === 0 ? (
-        <Empty description="暂无试卷，请点击右上角新建" />
-      ) : (
-        <Row gutter={[24, 24]}>
-          {filtered.map((paper) => (
-            <Col key={paper.id} xs={24} sm={12} lg={8}>
-              <Link
-                to="/paper-detail/$id"
-                params={{ id: paper.id }}
-                className="block"
-              >
+    <div>
+      <Card
+        title="试卷管理"
+        variant="outlined"
+        style={{
+          borderRadius: token.borderRadiusLG,
+          boxShadow: token.boxShadowTertiary,
+        }}
+        extra={
+          <Space size="middle">
+            <Input.Search
+              allowClear
+              placeholder="搜索试卷"
+              style={{ width: 240 }}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setOpen(true)}
+            >
+              新建试卷
+            </Button>
+          </Space>
+        }
+      >
+        {filtered.length === 0 ? (
+          <Empty
+            description="暂无试卷，请点击右上角新建"
+            style={{ padding: '32px 0' }}
+          />
+        ) : (
+          <Row gutter={[24, 24]} style={{ marginTop: -8 }}>
+            {filtered.map((paper) => (
+              <Col key={paper.id} xs={24} sm={12} lg={8}>
                 <Card
-                  bordered
                   hoverable
-                  bodyStyle={{ padding: 17 }}
-                  className="h-full hover:shadow-lg transition-shadow"
-                >
-                  <h3 className="text-base font-medium text-gray-800 one-line">
-                    {paper.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    最后修改时间:{' '}
-                    {dayjs(paper.updatedAt).format('YYYY-MM-DD HH:mm')}
-                  </p>
-                  {paper.remark && (
-                    <p className="text-gray-600 text-sm mt-1 multi-line-2">
-                      {paper.remark}
-                    </p>
-                  )}
-                  {paper.courseId && (
-                    <Tag
-                      color="#FEF3C7"
-                      className="text-yellow-700 border-none rounded-full px-2 mt-1"
+                  styles={{ body: { padding: 20 } }}
+                  style={{ height: '100%' }}
+                  actions={[
+                    <Link
+                      key="edit"
+                      to="/paper-detail/$id"
+                      params={{ id: paper.id }}
+                      style={{ color: token.colorPrimary }}
                     >
-                      {courses.find((c) => c.id === paper.courseId)?.name ||
-                        '未知课程'}
-                    </Tag>
-                  )}
-                  <div className="flex justify-between items-center mt-2">
-                    <span
-                      className="text-red-500 flex items-center gap-1 cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault(); // prevent link navigation
+                      <Space>
+                        <EditOutlined />
+                        编辑
+                      </Space>
+                    </Link>,
+                    <Popconfirm
+                      key="delete"
+                      title="确认删除?"
+                      description="删除后不可恢复，确定要删除吗？"
+                      onConfirm={(e) => {
+                        e?.stopPropagation();
                         handleDelete(paper.id);
                       }}
+                      okText="确定"
+                      cancelText="取消"
                     >
-                      <DeleteOutlined /> 删除
-                    </span>
-                    <span className="text-blue-500 flex items-center gap-1">
-                      <EditOutlined /> 编辑
-                    </span>
-                  </div>
+                      <Button
+                        type="text"
+                        danger
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: '100%' }}
+                      >
+                        <Space>
+                          <DeleteOutlined />
+                          删除
+                        </Space>
+                      </Button>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <Link
+                    to="/paper-detail/$id"
+                    params={{ id: paper.id }}
+                    style={{ color: 'inherit' }}
+                  >
+                    <Space
+                      direction="vertical"
+                      style={{ width: '100%' }}
+                      size={12}
+                    >
+                      <Typography.Title
+                        level={5}
+                        ellipsis={{ rows: 2 }}
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Space>
+                          <FileTextOutlined />
+                          {paper.title}
+                        </Space>
+                      </Typography.Title>
+                      <Space
+                        size={4}
+                        style={{
+                          color: token.colorTextSecondary,
+                          fontSize: token.fontSizeSM,
+                        }}
+                      >
+                        <ClockCircleOutlined />
+                        {dayjs(paper.updatedAt).format('YYYY-MM-DD HH:mm')}
+                      </Space>
+                      {paper.remark && (
+                        <Typography.Paragraph
+                          type="secondary"
+                          ellipsis={{ rows: 2 }}
+                          style={{ marginBottom: 0 }}
+                        >
+                          {paper.remark}
+                        </Typography.Paragraph>
+                      )}
+                      {paper.courseId && (
+                        <Tag color="blue">
+                          {courses.find((c) => c.id === paper.courseId)?.name ||
+                            '未知课程'}
+                        </Tag>
+                      )}
+                    </Space>
+                  </Link>
                 </Card>
-              </Link>
-            </Col>
-          ))}
-        </Row>
-      )}
+              </Col>
+            ))}
+          </Row>
+        )}
+      </Card>
       {open && <NewPaperModal open={open} onClose={() => setOpen(false)} />}
     </div>
   );

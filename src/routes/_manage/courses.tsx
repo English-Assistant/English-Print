@@ -1,149 +1,170 @@
 import { createFileRoute } from '@tanstack/react-router';
 import {
-  Table,
   Button,
-  Input,
+  Card,
+  Row,
+  Col,
+  Typography,
+  theme,
   Space,
-  message,
+  Tag,
   Popconfirm,
-  Modal,
-  Form,
+  message,
+  Input,
+  Empty,
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  CheckOutlined,
-  CloseOutlined,
+  BookOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useCourseStore } from '@/stores';
 import { useState } from 'react';
+import NewCourseModal from './-NewCourseModal';
+import dayjs from 'dayjs';
 
 export const Route = createFileRoute('/_manage/courses')({
-  component: CoursePage,
+  component: CoursesPage,
 });
 
-interface RowEditing {
-  id: string;
-  name: string;
-}
+function CoursesPage() {
+  const { token } = theme.useToken();
+  const { courses, deleteCourse } = useCourseStore();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [keyword, setKeyword] = useState('');
 
-function CoursePage() {
-  const { courses, addCourse, updateCourse, deleteCourse } = useCourseStore();
-  const [editing, setEditing] = useState<RowEditing | null>(null);
-  const [open, setOpen] = useState(false);
-  const [form] = Form.useForm();
+  const filtered = courses.filter((c) =>
+    c.name.toLowerCase().includes(keyword.toLowerCase()),
+  );
 
-  const handleAdd = async () => {
-    try {
-      const { name } = await form.validateFields();
-      addCourse(name.trim());
-      message.success('新增成功');
-      setOpen(false);
-      form.resetFields();
-    } catch {
-      /* ignore */
-    }
+  const handleDelete = (id: string) => {
+    deleteCourse(id);
+    message.success('删除成功');
   };
 
-  const columns = [
-    {
-      title: '课程名称',
-      dataIndex: 'name',
-      key: 'name',
-      render: (_: unknown, record: { id: string; name: string }) => {
-        if (editing?.id === record.id) {
-          return (
-            <Input
-              value={editing.name}
-              onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-            />
-          );
-        }
-        return record.name;
-      },
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_: unknown, record: { id: string; name: string }) => {
-        const isEditing = editing?.id === record.id;
-        return (
-          <Space>
-            {isEditing ? (
-              <>
-                <Button
-                  icon={<CheckOutlined />}
-                  type="primary"
-                  size="small"
-                  onClick={() => {
-                    if (!editing?.name.trim()) {
-                      message.warning('名称不能为空');
-                      return;
-                    }
-                    updateCourse(record.id, editing.name.trim());
-                    setEditing(null);
-                  }}
-                />
-                <Button
-                  icon={<CloseOutlined />}
-                  size="small"
-                  onClick={() => setEditing(null)}
-                />
-              </>
-            ) : (
-              <Button
-                icon={<EditOutlined />}
-                size="small"
-                onClick={() => setEditing({ id: record.id, name: record.name })}
-              />
-            )}
-            <Popconfirm
-              title="确认删除?"
-              onConfirm={() => deleteCourse(record.id)}
-            >
-              <Button danger icon={<DeleteOutlined />} size="small" />
-            </Popconfirm>
-          </Space>
-        );
-      },
-    },
-  ];
-
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">课程管理</h2>
-      <div className="mb-4">
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setOpen(true)}
-        >
-          新增课程
-        </Button>
-      </div>
-      <Modal
-        open={open}
-        onCancel={() => setOpen(false)}
-        onOk={handleAdd}
-        title="新增课程"
-        destroyOnClose
+    <div>
+      <Card
+        title="课程管理"
+        variant="outlined"
+        style={{
+          borderRadius: token.borderRadiusLG,
+          boxShadow: token.boxShadowTertiary,
+        }}
+        extra={
+          <Space size="middle">
+            <Input.Search
+              allowClear
+              placeholder="搜索课程"
+              style={{ width: 240 }}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsNewModalOpen(true)}
+            >
+              新建课程
+            </Button>
+          </Space>
+        }
       >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="课程名称"
-            rules={[{ required: true, message: '请输入课程名称' }]}
-          >
-            <Input autoFocus />
-          </Form.Item>
-        </Form>
-      </Modal>
-      <Table
-        rowKey="id"
-        dataSource={courses}
-        columns={columns}
-        pagination={false}
+        {filtered.length === 0 ? (
+          <Empty
+            description="暂无课程，请点击右上角新建"
+            style={{ padding: '32px 0' }}
+          />
+        ) : (
+          <Row gutter={[24, 24]} style={{ marginTop: -8 }}>
+            {filtered.map((course) => (
+              <Col key={course.id} xs={24} sm={12} lg={8}>
+                <Card
+                  hoverable
+                  styles={{ body: { padding: 20 } }}
+                  style={{ height: '100%' }}
+                  actions={[
+                    <Button
+                      key="edit"
+                      type="text"
+                      onClick={() => setEditingId(course.id)}
+                      style={{ width: '100%', color: token.colorPrimary }}
+                    >
+                      <Space>
+                        <EditOutlined />
+                        编辑
+                      </Space>
+                    </Button>,
+                    <Popconfirm
+                      key="delete"
+                      title="确认删除?"
+                      description="删除后不可恢复，确定要删除吗？"
+                      onConfirm={() => handleDelete(course.id)}
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <Button type="text" danger style={{ width: '100%' }}>
+                        <Space>
+                          <DeleteOutlined />
+                          删除
+                        </Space>
+                      </Button>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <Space
+                    direction="vertical"
+                    style={{ width: '100%' }}
+                    size={12}
+                  >
+                    <Typography.Title
+                      level={5}
+                      ellipsis={{ rows: 2 }}
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Space>
+                        <BookOutlined />
+                        {course.name}
+                      </Space>
+                    </Typography.Title>
+                    <Space
+                      size={4}
+                      style={{
+                        color: token.colorTextSecondary,
+                        fontSize: token.fontSizeSM,
+                      }}
+                    >
+                      <ClockCircleOutlined />
+                      {dayjs().format('YYYY-MM-DD HH:mm')}
+                    </Space>
+                    {course.description && (
+                      <Typography.Paragraph
+                        type="secondary"
+                        ellipsis={{ rows: 2 }}
+                        style={{ marginBottom: 0 }}
+                      >
+                        {course.description}
+                      </Typography.Paragraph>
+                    )}
+                    <Tag color="blue">{course.id}</Tag>
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+      </Card>
+
+      <NewCourseModal
+        open={isNewModalOpen || editingId !== null}
+        editingId={editingId}
+        onClose={() => {
+          setIsNewModalOpen(false);
+          setEditingId(null);
+        }}
       />
     </div>
   );

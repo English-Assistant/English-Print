@@ -97,6 +97,9 @@ export default function VanillaJsonEditor({
   }, [value, mode, readOnly]);
 
   return (
-    <div ref={containerRef} className={clsx('w-full h-full', className)} />
+    <div
+      ref={containerRef}
+      className={clsx('w-full h-full vanilla-json-editor', className)}
+    />
   );
 }

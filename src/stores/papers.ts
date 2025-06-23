@@ -1,21 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface Paper {
-  id: string;
-  title: string;
-  remark?: string;
-  courseId?: string;
-  preclass?: string; // markdown
-  copyJson?: Record<string, unknown>;
-  examJson?: Record<string, unknown>;
-  answerJson?: Record<string, unknown>;
-  updatedAt: string;
-}
+import type { Paper } from '@/data/types/exam';
 
 interface PaperStore {
   papers: Paper[];
-  addPaper: (p: Omit<Paper, 'id' | 'updatedAt'>) => void;
+  addPaper: (p: Omit<Paper, 'id' | 'sections'>) => void;
   deletePaper: (id: string) => void;
   updatePaper: (id: string, patch: Partial<Paper>) => void;
 }
@@ -30,7 +19,7 @@ export const usePaperStore = create<PaperStore>()(
             ...state.papers,
             {
               id: Date.now().toString(),
-              updatedAt: new Date().toISOString(),
+              sections: [],
               ...p,
             },
           ],
@@ -40,9 +29,7 @@ export const usePaperStore = create<PaperStore>()(
       updatePaper: (id, patch) =>
         set((state) => ({
           papers: state.papers.map((p) =>
-            p.id === id
-              ? { ...p, ...patch, updatedAt: new Date().toISOString() }
-              : p,
+            p.id === id ? { ...p, ...patch } : p,
           ),
         })),
     }),

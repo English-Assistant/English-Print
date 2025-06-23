@@ -1,6 +1,15 @@
 // SectionEditModal.tsx (已修正)
-import { useEffect } from 'react'; // 1. 导入 useEffect
-import { Modal, Form, Input, message } from 'antd';
+import { useEffect } from 'react';
+import {
+  Modal,
+  Form,
+  Input,
+  message,
+  theme,
+  Typography,
+  Space,
+  Alert,
+} from 'antd';
 import VanillaJsonEditor from '@/components/VanillaJsonEditor';
 import { usePaperStore } from '@/stores';
 import Ajv2020 from 'ajv/dist/2020';
@@ -15,7 +24,7 @@ const validateExam = ajv.compile(examSchema as object);
 const validateAnswer = ajv.compile(answerSchema as object);
 const validateCopy = ajv.compile(copySchema as object);
 
-type SectionKey = 'preclass' | 'copyJson' | 'examJson' | 'answerJson';
+export type SectionKey = 'preclass' | 'copyJson' | 'examJson' | 'answerJson';
 
 interface Props {
   open: boolean;
@@ -32,43 +41,40 @@ export default function SectionEditModal({
 }: Props) {
   const { papers, updatePaper } = usePaperStore();
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
 
-  // 2. 添加 useEffect 来同步数据到表单
   useEffect(() => {
-    // 仅在弹窗打开时执行
     if (open) {
       const paper = papers.find((p) => p.id === paperId);
       if (!paper || !sectionKey) return;
 
       if (sectionKey === 'preclass') {
-        // 为 Markdown 区域设置值
         form.setFieldsValue({ preclass: paper.preclass ?? '' });
       } else {
-        // 为 JSON 编辑器区域设置值
         const jsonValue = paper[sectionKey] ?? {};
         form.setFieldsValue({ json: jsonValue });
       }
     }
-  }, [open, paperId, sectionKey, papers, form]); // 依赖项数组，确保在关键 props 变化时重新执行
+  }, [open, paperId, sectionKey, papers, form]);
 
   const handleSave = async () => {
-    const values = await form.validateFields();
-
-    if (sectionKey === 'preclass') {
-      updatePaper(paperId, { preclass: values.preclass as string });
-    } else {
-      // 从 Form 获取的值已经是正确的对象格式，因为 VanillaJsonEditor 的 onChange 做了处理
-      const payload = values.json as Record<string, unknown>;
-
-      if (sectionKey === 'copyJson')
-        updatePaper(paperId, { copyJson: payload });
-      if (sectionKey === 'examJson')
-        updatePaper(paperId, { examJson: payload });
-      if (sectionKey === 'answerJson')
-        updatePaper(paperId, { answerJson: payload });
+    if (!sectionKey) {
+      return;
     }
-    message.success('保存成功');
-    onClose();
+    try {
+      const values = await form.validateFields();
+
+      if (sectionKey === 'preclass') {
+        updatePaper(paperId, { preclass: values.preclass as string });
+      } else {
+        const payload = values.json as Record<string, unknown>;
+        updatePaper(paperId, { [sectionKey]: payload });
+      }
+      message.success('保存成功');
+      onClose();
+    } catch {
+      // Form validation will handle the error display
+    }
   };
 
   const titleMap: Record<SectionKey, string> = {
@@ -81,77 +87,111 @@ export default function SectionEditModal({
   return (
     <Modal
       open={open}
-      title={sectionKey ? titleMap[sectionKey] : ''}
-      onCancel={onClose}
+      title={
+        <Space>
+          <Typography.Text strong>
+            {sectionKey ? titleMap[sectionKey] : ''}
+          </Typography.Text>
+          <Typography.Text
+            type="secondary"
+            style={{ fontSize: token.fontSizeSM }}
+          >
+            {sectionKey === 'preclass' ? '(Markdown格式)' : '(JSON格式)'}
+          </Typography.Text>
+        </Space>
+      }
+      width={sectionKey === 'preclass' ? 800 : 1000}
+      style={{ top: 20 }}
+      styles={{ body: { padding: '24px 24px 8px' } }}
       onOk={handleSave}
-      width={sectionKey === 'preclass' ? 600 : 700}
-      destroyOnClose
-      // 3. 移除 Form 上的 initialValues，因为它现在由 useEffect 控制
+      onCancel={onClose}
+      okText="确定"
+      cancelText="取消"
     >
-      {sectionKey === 'preclass' ? (
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="Markdown 内容"
-            name="preclass"
-            rules={[{ required: true, message: '不能为空' }]}
-          >
-            <Input.TextArea rows={12} />
-          </Form.Item>
-        </Form>
-      ) : (
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="json"
-            // getValueFromEvent 替代 getValueProps, 这是 antd 中更标准的处理自定义组件值的方式
-            getValueFromEvent={(v) => {
-              // 这个函数会在 VanillaJsonEditor 的 onChange 被调用时触发
-              return v;
-            }}
-            rules={[
-              { required: true, message: 'JSON内容不能为空' },
-              {
-                validator: async (_rule, v: Record<string, unknown>) => {
-                  // v 已经是 JS 对象，无需解析
-                  if (!v) return Promise.reject(new Error('JSON内容不能为空'));
-
-                  let valid = true;
-                  let errors: string | undefined;
-
-                  const validator =
-                    sectionKey === 'copyJson'
-                      ? validateCopy
-                      : sectionKey === 'examJson'
-                        ? validateExam
-                        : sectionKey === 'answerJson'
-                          ? validateAnswer
-                          : null;
-
-                  if (validator) {
-                    valid = validator(v);
-                    if (!valid && validator.errors) {
-                      // 提取更详细的错误信息
-                      errors = validator.errors
-                        .map((e) => `${e.instancePath || 'root'} ${e.message}`)
-                        .join('; ');
-                    }
-                  }
-
-                  return valid
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error(`JSON Schema 校验失败: ${errors || ''}`),
-                      );
-                },
-              },
-            ]}
-          >
-            <VanillaJsonEditor
-              readOnly={false}
-              className="h-[500px] overflow-hidden overflow-y-auto max-h-[500px]"
+      <Form
+        form={form}
+        layout="vertical"
+        style={{ overflow: 'auto', maxHeight: 'calc(100vh - 200px)' }}
+      >
+        {sectionKey === 'preclass' ? (
+          <>
+            <Alert
+              message="支持 Markdown 格式编写，包括标题、列表、加粗、链接等基础语法。"
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
             />
-          </Form.Item>
-        </Form>
-      )}
+            <Form.Item
+              name="preclass"
+              rules={[{ required: true, message: '请输入课程导读内容' }]}
+            >
+              <Input.TextArea
+                rows={20}
+                placeholder="请输入课程导读内容..."
+                style={{
+                  fontFamily: token.fontFamilyCode,
+                  backgroundColor: token.colorFillTertiary,
+                }}
+              />
+            </Form.Item>
+          </>
+        ) : (
+          <>
+            <Alert
+              message="请按照规定的 JSON Schema 格式编写内容，编辑器会实时校验格式是否正确。"
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+            <Form.Item
+              name="json"
+              rules={[
+                { required: true, message: 'JSON内容不能为空' },
+                {
+                  validator: async (_rule, v: Record<string, unknown>) => {
+                    if (!v)
+                      return Promise.reject(new Error('JSON内容不能为空'));
+                    let valid = true;
+                    let errors: string | undefined;
+
+                    const validator =
+                      sectionKey === 'copyJson'
+                        ? validateCopy
+                        : sectionKey === 'examJson'
+                          ? validateExam
+                          : sectionKey === 'answerJson'
+                            ? validateAnswer
+                            : null;
+
+                    if (validator) {
+                      valid = validator(v);
+                      if (!valid && validator.errors) {
+                        errors = validator.errors
+                          .map(
+                            (e) => `${e.instancePath || 'root'} ${e.message}`,
+                          )
+                          .join('; ');
+                      }
+                    }
+
+                    return valid
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(`JSON Schema 校验失败: ${errors || ''}`),
+                        );
+                  },
+                },
+              ]}
+              style={{ marginBottom: 0 }}
+            >
+              <VanillaJsonEditor
+                readOnly={false}
+                className="vanilla-json-editor"
+              />
+            </Form.Item>
+          </>
+        )}
+      </Form>
     </Modal>
   );
 }

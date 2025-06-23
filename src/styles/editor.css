@@ -1,0 +1,105 @@
+/* 编辑器主题样式 */
+.vanilla-json-editor {
+  --jse-theme-color: var(--ant-color-text);
+  --jse-theme-color-background: var(--ant-color-bg-container);
+  --jse-theme-color-background-focus: var(--ant-color-primary-bg);
+  --jse-theme-color-readonly: var(--ant-color-bg-container-disabled);
+  --jse-theme-color-readonly-text: var(--ant-color-text-disabled);
+  --jse-theme-color-border: var(--ant-color-border);
+  --jse-theme-color-separator: var(--ant-color-border);
+  --jse-theme-color-highlight: var(--ant-color-primary-bg);
+  --jse-theme-color-active: var(--ant-color-primary-bg-hover);
+  --jse-theme-color-keys: var(--ant-color-info);
+  --jse-theme-color-values: var(--ant-color-text);
+  --jse-theme-color-number: var(--ant-color-primary);
+  --jse-theme-color-string: var(--ant-color-success);
+  --jse-theme-color-boolean: var(--ant-color-warning);
+  --jse-theme-color-null: var(--ant-color-error);
+  --jse-theme-color-preview: var(--ant-color-text-secondary);
+  --jse-theme-color-error: var(--ant-color-error);
+  --jse-theme-color-error-background: var(--ant-color-error-bg);
+  --jse-theme-color-validation-error: var(--ant-color-error);
+  --jse-theme-color-validation-background: var(--ant-color-error-bg);
+  --jse-theme-color-search-match: var(--ant-color-primary-bg);
+  --jse-theme-color-search-match-active: var(--ant-color-primary-bg-hover);
+  --jse-theme-color-search-match-text: var(--ant-color-text);
+  --jse-theme-color-search-match-active-text: var(--ant-color-text);
+  --jse-theme-color-selection: var(--ant-color-primary-bg);
+  --jse-theme-color-selection-text: var(--ant-color-text);
+  --jse-theme-color-selection-background: var(--ant-color-primary-bg);
+  --jse-theme-color-selection-background-inactive: var(--ant-color-primary-bg);
+  --jse-theme-color-selection-background-focus: var(
+    --ant-color-primary-bg-hover
+  );
+  --jse-theme-color-selection-background-focus-inactive: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-error: var(--ant-color-error-bg);
+  --jse-theme-color-selection-background-error-focus: var(--ant-color-error-bg);
+  --jse-theme-color-selection-background-error-focus-inactive: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-background-error-inactive: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-background-highlight: var(--ant-color-primary-bg);
+  --jse-theme-color-selection-background-highlight-focus: var(
+    --ant-color-primary-bg-hover
+  );
+  --jse-theme-color-selection-background-highlight-focus-inactive: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-highlight-inactive: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-search-match: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-search-match-focus: var(
+    --ant-color-primary-bg-hover
+  );
+  --jse-theme-color-selection-background-search-match-focus-inactive: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-search-match-inactive: var(
+    --ant-color-primary-bg
+  );
+  --jse-theme-color-selection-background-validation-error: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-background-validation-error-focus: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-background-validation-error-focus-inactive: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-background-validation-error-inactive: var(
+    --ant-color-error-bg
+  );
+  --jse-theme-color-selection-text-error: var(--ant-color-error);
+  --jse-theme-color-selection-text-error-focus: var(--ant-color-error);
+  --jse-theme-color-selection-text-error-focus-inactive: var(--ant-color-error);
+  --jse-theme-color-selection-text-error-inactive: var(--ant-color-error);
+  --jse-theme-color-selection-text-highlight: var(--ant-color-text);
+  --jse-theme-color-selection-text-highlight-focus: var(--ant-color-text);
+  --jse-theme-color-selection-text-highlight-focus-inactive: var(
+    --ant-color-text
+  );
+  --jse-theme-color-selection-text-highlight-inactive: var(--ant-color-text);
+  --jse-theme-color-selection-text-search-match: var(--ant-color-text);
+  --jse-theme-color-selection-text-search-match-focus: var(--ant-color-text);
+  --jse-theme-color-selection-text-search-match-focus-inactive: var(
+    --ant-color-text
+  );
+  --jse-theme-color-selection-text-search-match-inactive: var(--ant-color-text);
+  --jse-theme-color-selection-text-validation-error: var(--ant-color-error);
+  --jse-theme-color-selection-text-validation-error-focus: var(
+    --ant-color-error
+  );
+  --jse-theme-color-selection-text-validation-error-focus-inactive: var(
+    --ant-color-error
+  );
+  --jse-theme-color-selection-text-validation-error-inactive: var(
+    --ant-color-error
+  );
+}

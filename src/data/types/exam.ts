@@ -74,3 +74,16 @@ export interface OpenEndedData {
   id: string;
   text: string;
 }
+
+export interface Paper {
+  id: string;
+  title: string;
+  courseId?: string;
+  remark?: string;
+  sections?: string[];
+  preclass?: string;
+  copyJson?: Record<string, unknown>;
+  examJson?: Record<string, unknown>;
+  answerJson?: Record<string, unknown>;
+  updatedAt: string;
+}

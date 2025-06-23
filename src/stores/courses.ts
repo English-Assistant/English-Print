@@ -4,12 +4,13 @@ import { persist } from 'zustand/middleware';
 export interface Course {
   id: string;
   name: string;
+  description: string;
 }
 
 interface CourseStore {
   courses: Course[];
-  addCourse: (name: string) => void;
-  updateCourse: (id: string, name: string) => void;
+  addCourse: (course: Omit<Course, 'id'>) => void;
+  updateCourse: (id: string, course: Partial<Omit<Course, 'id'>>) => void;
   deleteCourse: (id: string) => void;
 }
 
@@ -17,13 +18,15 @@ export const useCourseStore = create<CourseStore>()(
   persist(
     (set) => ({
       courses: [],
-      addCourse: (name) =>
+      addCourse: (course) =>
         set((state) => ({
-          courses: [...state.courses, { id: Date.now().toString(), name }],
+          courses: [...state.courses, { id: Date.now().toString(), ...course }],
         })),
-      updateCourse: (id, name) =>
+      updateCourse: (id, course) =>
         set((state) => ({
-          courses: state.courses.map((c) => (c.id === id ? { ...c, name } : c)),
+          courses: state.courses.map((c) =>
+            c.id === id ? { ...c, ...course } : c,
+          ),
         })),
       deleteCourse: (id) =>
         set((state) => ({
