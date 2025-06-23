@@ -29,7 +29,7 @@ function Answer() {
   }
 
   return (
-    <div className="w-[794px] mx-auto pt-8 pb-20 print:w-[210mm] print:min-h-[297mm] flex flex-col gap-4">
+    <div className="w-[794px] mx-auto pt-8 pb-20 print:w-[210mm] print:min-h-[297mm] flex flex-col gap-6">
       <h1 className="text-[24px] leading-8 font-bold text-blue-800 text-center">
         {paper.answerJson.title}
       </h1>
