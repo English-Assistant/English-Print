@@ -6,7 +6,11 @@ import {
   useLocation,
 } from '@tanstack/react-router';
 import { Divider, Layout, Menu, theme, Typography } from 'antd';
-import { FileTextOutlined, BookOutlined } from '@ant-design/icons';
+import {
+  FileTextOutlined,
+  BookOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 
 export const Route = createFileRoute('/_manage')({
   component: ManageLayout,
@@ -15,7 +19,14 @@ export const Route = createFileRoute('/_manage')({
 function ManageLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const selectedKey = pathname.startsWith('/courses') ? '/courses' : '/';
+
+  const getCurrentKey = () => {
+    if (pathname.startsWith('/_manage/courses')) return '/courses';
+    if (pathname.startsWith('/_manage/settings')) return '/settings';
+    return '/';
+  };
+  const selectedKey = getCurrentKey();
+
   const { token } = theme.useToken();
 
   return (
@@ -62,6 +73,11 @@ function ManageLayout() {
               key: '/courses',
               icon: <BookOutlined />,
               label: <Link to="/courses">课程管理</Link>,
+            },
+            {
+              key: '/settings',
+              icon: <SettingOutlined />,
+              label: <Link to="/settings">接口设置</Link>,
             },
           ]}
           onClick={(info) => navigate({ to: info.key })}

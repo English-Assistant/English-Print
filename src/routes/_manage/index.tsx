@@ -12,6 +12,7 @@ import {
   Typography,
   Space,
   Popconfirm,
+  Tooltip,
 } from 'antd';
 import {
   PlusOutlined,
@@ -23,7 +24,9 @@ import {
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { usePaperStore, useCourseStore } from '@/stores';
+import { useSettingsStore } from '@/stores/settings';
 import NewPaperModal from './-NewPaperModal';
+import BatchNewPaperModal from './-BatchNewPaperModal';
 
 export const Route = createFileRoute('/_manage/')({
   component: PaperManagement,
@@ -32,8 +35,10 @@ export const Route = createFileRoute('/_manage/')({
 function PaperManagement() {
   const { papers, deletePaper } = usePaperStore();
   const { courses } = useCourseStore();
+  const { apiUrl, apiToken } = useSettingsStore();
   const [keyword, setKeyword] = useState('');
   const [open, setOpen] = useState(false);
+  const [openBatch, setOpenBatch] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { token } = theme.useToken();
 
@@ -60,6 +65,14 @@ function PaperManagement() {
     setOpen(false);
   };
 
+  const handleOpenBatchNew = () => {
+    setOpenBatch(true);
+  };
+
+  const handleCloseBatchNew = () => {
+    setOpenBatch(false);
+  };
+
   return (
     <div>
       <Card
@@ -78,6 +91,19 @@ function PaperManagement() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
             />
+            <Tooltip
+              title={
+                !apiUrl || !apiToken ? '请先在"接口设置"中配置 API 信息' : ''
+              }
+            >
+              <Button
+                icon={<PlusOutlined />}
+                onClick={handleOpenBatchNew}
+                disabled={!apiUrl || !apiToken}
+              >
+                批量新增
+              </Button>
+            </Tooltip>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -198,6 +224,9 @@ function PaperManagement() {
           editingId={editingId}
           onClose={handleClose}
         />
+      )}
+      {openBatch && (
+        <BatchNewPaperModal open={openBatch} onClose={handleCloseBatchNew} />
       )}
     </div>
   );
