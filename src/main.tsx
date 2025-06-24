@@ -5,7 +5,6 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import 'virtual:uno.css';
 import { routeTree } from './routeTree.gen';
 import '@unocss/reset/tailwind-compat.css';
-import 'uno.css';
 import './styles/editor.css';
 
 const router = createRouter({ routeTree });

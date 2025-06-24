@@ -44,3 +44,5 @@ export const useCourseStore = create<CourseStore>()(
     },
   ),
 );
+
+export { type Course };

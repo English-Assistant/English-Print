@@ -45,3 +45,5 @@ export const usePaperStore = create<PaperStore>()(
     },
   ),
 );
+
+export { type Paper };
