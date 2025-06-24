@@ -16,6 +16,7 @@ import { Route as PreclassGuideIdRouteImport } from './routes/preclass-guide/$id
 import { Route as PaperIdRouteImport } from './routes/paper/$id'
 import { Route as AnswerIdRouteImport } from './routes/answer/$id'
 import { Route as ManageSettingsRouteImport } from './routes/_manage/settings'
+import { Route as ManageDataRouteImport } from './routes/_manage/data'
 import { Route as ManageCoursesRouteImport } from './routes/_manage/courses'
 import { Route as ManagePaperDetailIdRouteImport } from './routes/_manage/paper-detail/$id'
 
@@ -53,6 +54,11 @@ const ManageSettingsRoute = ManageSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => ManageRoute,
 } as any)
+const ManageDataRoute = ManageDataRouteImport.update({
+  id: '/data',
+  path: '/data',
+  getParentRoute: () => ManageRoute,
+} as any)
 const ManageCoursesRoute = ManageCoursesRouteImport.update({
   id: '/courses',
   path: '/courses',
@@ -66,6 +72,7 @@ const ManagePaperDetailIdRoute = ManagePaperDetailIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/courses': typeof ManageCoursesRoute
+  '/data': typeof ManageDataRoute
   '/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/courses': typeof ManageCoursesRoute
+  '/data': typeof ManageDataRoute
   '/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_manage': typeof ManageRouteWithChildren
   '/_manage/courses': typeof ManageCoursesRoute
+  '/_manage/data': typeof ManageDataRoute
   '/_manage/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/courses'
+    | '/data'
     | '/settings'
     | '/answer/$id'
     | '/paper/$id'
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/courses'
+    | '/data'
     | '/settings'
     | '/answer/$id'
     | '/paper/$id'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_manage'
     | '/_manage/courses'
+    | '/_manage/data'
     | '/_manage/settings'
     | '/answer/$id'
     | '/paper/$id'
@@ -189,6 +201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ManageSettingsRouteImport
       parentRoute: typeof ManageRoute
     }
+    '/_manage/data': {
+      id: '/_manage/data'
+      path: '/data'
+      fullPath: '/data'
+      preLoaderRoute: typeof ManageDataRouteImport
+      parentRoute: typeof ManageRoute
+    }
     '/_manage/courses': {
       id: '/_manage/courses'
       path: '/courses'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 
 interface ManageRouteChildren {
   ManageCoursesRoute: typeof ManageCoursesRoute
+  ManageDataRoute: typeof ManageDataRoute
   ManageSettingsRoute: typeof ManageSettingsRoute
   ManageIndexRoute: typeof ManageIndexRoute
   ManagePaperDetailIdRoute: typeof ManagePaperDetailIdRoute
@@ -215,6 +235,7 @@ interface ManageRouteChildren {
 
 const ManageRouteChildren: ManageRouteChildren = {
   ManageCoursesRoute: ManageCoursesRoute,
+  ManageDataRoute: ManageDataRoute,
   ManageSettingsRoute: ManageSettingsRoute,
   ManageIndexRoute: ManageIndexRoute,
   ManagePaperDetailIdRoute: ManagePaperDetailIdRoute,

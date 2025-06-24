@@ -10,6 +10,7 @@ import {
   FileTextOutlined,
   BookOutlined,
   SettingOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 
 export const Route = createFileRoute('/_manage')({
@@ -22,6 +23,7 @@ function ManageLayout() {
 
   const getCurrentKey = () => {
     if (pathname.startsWith('/courses')) return '/courses';
+    if (pathname.startsWith('/data')) return '/data';
     if (pathname.startsWith('/settings')) return '/settings';
     return '/';
   };
@@ -73,6 +75,11 @@ function ManageLayout() {
               key: '/courses',
               icon: <BookOutlined />,
               label: <Link to="/courses">课程管理</Link>,
+            },
+            {
+              key: '/data',
+              icon: <DatabaseOutlined />,
+              label: <Link to="/data">数据管理</Link>,
             },
             {
               key: '/settings',
