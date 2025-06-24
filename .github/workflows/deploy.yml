@@ -28,23 +28,27 @@ jobs:
     steps:
       - name: 检出代码 (Checkout)
         uses: actions/checkout@v4
+
+      - name: 设置 pnpm (Setup pnpm)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: 设置 Node.js 环境 (Setup Node)
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
-      - name: 安装 pnpm (Install pnpm)
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          run_install: |
-            - recursive: true
-              args: [--frozen-lockfile, --strict-peer-dependencies]
-            - args: [--global, gulp, prettier]
+
+      - name: 安装依赖 (Install dependencies)
+        run: pnpm install --frozen-lockfile
+
       - name: 构建项目 (Build)
         run: pnpm build
+
       - name: 设置 Pages (Setup Pages)
         uses: actions/configure-pages@v5
+
       - name: 上传构建产物 (Upload artifact)
         uses: actions/upload-pages-artifact@v3
         with:
