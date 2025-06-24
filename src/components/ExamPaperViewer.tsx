@@ -42,7 +42,7 @@ export default function ExamPaperViewer({ paper }: ExamPaperViewerProps) {
 function SectionView({ section }: { section: Section }) {
   // 完全保留您优化的新样式
   return (
-    <article className="mx-8 mt-4 pb-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+    <article className="mt-4 pb-6 bg-white border border-gray-200 rounded-lg shadow-sm">
       <header className="bg-blue-50 border-l-4 border-blue-600 rounded-t-lg px-5 py-3 mb-4">
         <h2 className="text-lg font-semibold text-blue-900 flex items-baseline gap-3">
           <span>{section.sectionNumber}</span>
@@ -181,7 +181,7 @@ function QuestionView({ question }: { question: Question }) {
       const promptPart = `${spellingData.number} (${spellingData.hint}) ${spellingData.stem}`;
 
       return (
-        <div className="flex items-baseline">
+        <div className="flex items-end">
           <span>{promptPart}</span>
           <span className="flex-1 border-b border-gray-600 ml-2 min-w-[150px]"></span>
         </div>

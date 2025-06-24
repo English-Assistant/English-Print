@@ -20,6 +20,8 @@
     "antd": "^5.26.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "dexie": "^4.0.11",
+    "github-markdown-css": "^5.8.1",
     "html2pdf.js": "^0.10.3",
     "lodash-es": "^4.17.21",
     "react": "^19.1.0",

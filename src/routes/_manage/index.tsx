@@ -34,6 +34,7 @@ function PaperManagement() {
   const { courses } = useCourseStore();
   const [keyword, setKeyword] = useState('');
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { token } = theme.useToken();
 
   const filtered = papers.filter((p) =>
@@ -43,6 +44,20 @@ function PaperManagement() {
   const handleDelete = (id: string) => {
     deletePaper(id);
     message.success('删除成功');
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingId(id);
+    setOpen(true);
+  };
+
+  const handleOpenNew = () => {
+    setEditingId(null);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
@@ -66,7 +81,7 @@ function PaperManagement() {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              onClick={() => setOpen(true)}
+              onClick={handleOpenNew}
             >
               新建试卷
             </Button>
@@ -87,17 +102,18 @@ function PaperManagement() {
                   styles={{ body: { padding: 20 } }}
                   style={{ height: '100%' }}
                   actions={[
-                    <Link
+                    <Button
                       key="edit"
-                      to="/paper-detail/$id"
-                      params={{ id: paper.id }}
-                      style={{ color: token.colorPrimary }}
+                      type="text"
+                      icon={<EditOutlined />}
+                      style={{ width: '100%', color: token.colorPrimary }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(paper.id);
+                      }}
                     >
-                      <Space>
-                        <EditOutlined />
-                        编辑
-                      </Space>
-                    </Link>,
+                      编辑
+                    </Button>,
                     <Popconfirm
                       key="delete"
                       title="确认删除?"
@@ -164,8 +180,8 @@ function PaperManagement() {
                       )}
                       {paper.courseId && (
                         <Tag color="blue">
-                          {courses.find((c) => c.id === paper.courseId)?.name ||
-                            '未知课程'}
+                          {courses.find((c) => c.id === paper.courseId)
+                            ?.title || '未知课程'}
                         </Tag>
                       )}
                     </Space>
@@ -176,7 +192,13 @@ function PaperManagement() {
           </Row>
         )}
       </Card>
-      {open && <NewPaperModal open={open} onClose={() => setOpen(false)} />}
+      {open && (
+        <NewPaperModal
+          open={open}
+          editingId={editingId}
+          onClose={handleClose}
+        />
+      )}
     </div>
   );
 }

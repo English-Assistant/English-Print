@@ -37,7 +37,7 @@ function CoursesPage() {
   const [keyword, setKeyword] = useState('');
 
   const filtered = courses.filter((c) =>
-    c.name.toLowerCase().includes(keyword.toLowerCase()),
+    c.title.toLowerCase().includes(keyword.toLowerCase()),
   );
 
   const handleDelete = (id: string) => {
@@ -127,7 +127,7 @@ function CoursesPage() {
                     >
                       <Space>
                         <BookOutlined />
-                        {course.name}
+                        {course.title}
                       </Space>
                     </Typography.Title>
                     <Space

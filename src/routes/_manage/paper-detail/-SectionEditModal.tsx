@@ -1,5 +1,5 @@
 // SectionEditModal.tsx (已修正)
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Modal,
   Form,
@@ -9,8 +9,11 @@ import {
   Typography,
   Space,
   Alert,
+  Button,
 } from 'antd';
-import VanillaJsonEditor from '@/components/VanillaJsonEditor';
+import VanillaJsonEditor, {
+  type JsonEditorHandle,
+} from '@/components/VanillaJsonEditor';
 import { usePaperStore } from '@/stores';
 import Ajv2020 from 'ajv/dist/2020';
 import draft7Meta from 'ajv/dist/refs/json-schema-draft-07.json';
@@ -24,7 +27,12 @@ const validateExam = ajv.compile(examSchema as object);
 const validateAnswer = ajv.compile(answerSchema as object);
 const validateCopy = ajv.compile(copySchema as object);
 
-export type SectionKey = 'preclass' | 'copyJson' | 'examJson' | 'answerJson';
+export type SectionKey =
+  | 'preclass'
+  | 'listeningMaterial'
+  | 'copyJson'
+  | 'examJson'
+  | 'answerJson';
 
 interface Props {
   open: boolean;
@@ -42,14 +50,15 @@ export default function SectionEditModal({
   const { papers, updatePaper } = usePaperStore();
   const [form] = Form.useForm();
   const { token } = theme.useToken();
+  const editorRef = useRef<JsonEditorHandle>(null);
 
   useEffect(() => {
     if (open) {
       const paper = papers.find((p) => p.id === paperId);
       if (!paper || !sectionKey) return;
 
-      if (sectionKey === 'preclass') {
-        form.setFieldsValue({ preclass: paper.preclass ?? '' });
+      if (sectionKey === 'preclass' || sectionKey === 'listeningMaterial') {
+        form.setFieldsValue({ [sectionKey]: paper[sectionKey] ?? '' });
       } else {
         const jsonValue = paper[sectionKey] ?? {};
         form.setFieldsValue({ json: jsonValue });
@@ -64,8 +73,8 @@ export default function SectionEditModal({
     try {
       const values = await form.validateFields();
 
-      if (sectionKey === 'preclass') {
-        updatePaper(paperId, { preclass: values.preclass as string });
+      if (sectionKey === 'preclass' || sectionKey === 'listeningMaterial') {
+        updatePaper(paperId, { [sectionKey]: values[sectionKey] });
       } else {
         const payload = values.json as Record<string, unknown>;
         updatePaper(paperId, { [sectionKey]: payload });
@@ -77,8 +86,13 @@ export default function SectionEditModal({
     }
   };
 
+  const handleFormat = () => {
+    editorRef.current?.format();
+  };
+
   const titleMap: Record<SectionKey, string> = {
     preclass: '课程导读',
+    listeningMaterial: '听力素材',
     copyJson: '抄写练习',
     examJson: '试卷',
     answerJson: '答案卡',
@@ -96,38 +110,55 @@ export default function SectionEditModal({
             type="secondary"
             style={{ fontSize: token.fontSizeSM }}
           >
-            {sectionKey === 'preclass' ? '(Markdown格式)' : '(JSON格式)'}
+            {sectionKey === 'preclass' || sectionKey === 'listeningMaterial'
+              ? '(长文本格式)'
+              : '(JSON格式)'}
           </Typography.Text>
         </Space>
       }
-      width={sectionKey === 'preclass' ? 800 : 1000}
+      width={
+        sectionKey === 'preclass' || sectionKey === 'listeningMaterial'
+          ? 800
+          : 1000
+      }
       style={{ top: 20 }}
-      styles={{ body: { padding: '24px 24px 8px' } }}
+      // styles={{ body: { padding: '24px 24px 8px' } }}
       onOk={handleSave}
       onCancel={onClose}
       okText="确定"
       cancelText="取消"
+      footer={(_, { OkBtn, CancelBtn }) => {
+        const isJsonMode =
+          sectionKey !== 'preclass' && sectionKey !== 'listeningMaterial';
+        return (
+          <>
+            <CancelBtn />
+            {isJsonMode && <Button onClick={handleFormat}>格式化 JSON</Button>}
+            <OkBtn />
+          </>
+        );
+      }}
     >
       <Form
         form={form}
         layout="vertical"
         style={{ overflow: 'auto', maxHeight: 'calc(100vh - 200px)' }}
       >
-        {sectionKey === 'preclass' ? (
+        {sectionKey === 'preclass' || sectionKey === 'listeningMaterial' ? (
           <>
             <Alert
-              message="支持 Markdown 格式编写，包括标题、列表、加粗、链接等基础语法。"
+              message="支持纯文本或 Markdown 格式编写。"
               type="info"
               showIcon
               style={{ marginBottom: 16 }}
             />
             <Form.Item
-              name="preclass"
-              rules={[{ required: true, message: '请输入课程导读内容' }]}
+              name={sectionKey}
+              rules={[{ required: true, message: '请输入内容' }]}
             >
               <Input.TextArea
                 rows={20}
-                placeholder="请输入课程导读内容..."
+                placeholder="请输入内容..."
                 style={{
                   fontFamily: token.fontFamilyCode,
                   backgroundColor: token.colorFillTertiary,
@@ -185,6 +216,7 @@ export default function SectionEditModal({
               style={{ marginBottom: 0 }}
             >
               <VanillaJsonEditor
+                ref={editorRef}
                 readOnly={false}
                 className="vanilla-json-editor"
               />

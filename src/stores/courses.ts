@@ -1,31 +1,36 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-export interface Course {
-  id: string;
-  name: string;
-  description: string;
-}
+import { persist, createJSONStorage } from 'zustand/middleware';
+import type { Course } from '../data/types/course';
+import dexieStorage from './storage';
 
 interface CourseStore {
   courses: Course[];
-  addCourse: (course: Omit<Course, 'id'>) => void;
-  updateCourse: (id: string, course: Partial<Omit<Course, 'id'>>) => void;
+  getCourseById: (id: string) => Course | undefined;
+  addCourse: (course: Omit<Course, 'id' | 'createdAt'>) => void;
   deleteCourse: (id: string) => void;
+  updateCourse: (id: string, patch: Partial<Omit<Course, 'id'>>) => void;
 }
 
 export const useCourseStore = create<CourseStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       courses: [],
+      getCourseById: (id) => get().courses.find((c) => c.id === id),
       addCourse: (course) =>
         set((state) => ({
-          courses: [...state.courses, { id: Date.now().toString(), ...course }],
+          courses: [
+            ...state.courses,
+            {
+              ...course,
+              id: Date.now().toString(),
+              createdAt: new Date().toISOString(),
+            },
+          ],
         })),
-      updateCourse: (id, course) =>
+      updateCourse: (id, patch) =>
         set((state) => ({
           courses: state.courses.map((c) =>
-            c.id === id ? { ...c, ...course } : c,
+            c.id === id ? { ...c, ...patch } : c,
           ),
         })),
       deleteCourse: (id) =>
@@ -34,7 +39,8 @@ export const useCourseStore = create<CourseStore>()(
         })),
     }),
     {
-      name: 'englishprint-course-store',
+      name: 'course-storage',
+      storage: createJSONStorage(() => dexieStorage),
     },
   ),
 );

@@ -1,6 +1,7 @@
 import { Modal, Form, Input, theme, message } from 'antd';
 import { useCourseStore } from '@/stores';
 import { useEffect } from 'react';
+import type { Course } from '@/data/types/course';
 
 interface Props {
   open: boolean;
@@ -8,10 +9,12 @@ interface Props {
   onClose: () => void;
 }
 
+type FormValues = Omit<Course, 'id' | 'createdAt'>;
+
 export default function NewCourseModal({ open, editingId, onClose }: Props) {
   const { token } = theme.useToken();
   const { courses, addCourse, updateCourse } = useCourseStore();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormValues>();
 
   useEffect(() => {
     if (open && editingId) {
@@ -51,29 +54,15 @@ export default function NewCourseModal({ open, editingId, onClose }: Props) {
       forceRender={true}
     >
       <Form form={form} layout="vertical" style={{ marginTop: token.marginMD }}>
-        <Form.Item
-          name="name"
+        <Form.Item<FormValues>
+          name="title"
           label="课程名称"
           rules={[{ required: true, message: '请输入课程名称' }]}
         >
-          <Input
-            autoFocus
-            placeholder="请输入课程名称"
-            showCount
-            maxLength={50}
-          />
+          <Input autoFocus placeholder="请输入课程名称" />
         </Form.Item>
-        <Form.Item
-          name="description"
-          label="课程描述"
-          rules={[{ required: true, message: '请输入课程描述' }]}
-        >
-          <Input.TextArea
-            placeholder="请输入课程描述"
-            showCount
-            maxLength={200}
-            rows={4}
-          />
+        <Form.Item<FormValues> name="description" label="课程描述">
+          <Input.TextArea placeholder="请输入课程描述" rows={4} />
         </Form.Item>
       </Form>
     </Modal>

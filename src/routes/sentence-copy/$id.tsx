@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { usePaperStore } from '@/stores';
+import { useCourseStore, usePaperStore } from '@/stores';
+import PrintPageLayout from '@/components/PrintPageLayout';
 
 export const Route = createFileRoute('/sentence-copy/$id')({
   component: SentenceCopy,
@@ -7,16 +8,18 @@ export const Route = createFileRoute('/sentence-copy/$id')({
 
 function SentenceCopy() {
   const { id } = Route.useParams() as { id: string };
-  const { papers } = usePaperStore();
-  const paper = papers.find((p) => p.id === id);
-
-  console.log(paper);
+  const paper = usePaperStore((state) => state.getPaperById(id));
+  const course = useCourseStore((state) =>
+    state.getCourseById(paper?.courseId ?? ''),
+  );
 
   if (!paper) {
     return <div className="p-6">未找到试卷</div>;
   }
 
   const data = paper.copyJson;
+
+  console.log(data, paper);
 
   if (!data) return <div className="p-6">暂无抄写数据</div>;
 
@@ -25,24 +28,11 @@ function SentenceCopy() {
   const transforms = data?.sentence_transform ?? [];
 
   return (
-    <div className="w-[794px] mx-auto flex flex-col gap-6 py-8 print:w-[210mm] print:min-h-[297mm]">
-      <h1 className="text-2xl font-bold text-blue-900 text-center">
-        {data.title} 抄写练习
-      </h1>
-
-      {/* 学生信息 */}
-      <div className="flex justify-between px-8 text-gray-600">
-        <div className="flex items-baseline gap-2 w-1/2 max-w-[240px]">
-          <span>学生姓名:</span>
-          <div className="flex-1 border-b border-gray-400 h-px" />
-        </div>
-        <div className="flex items-baseline gap-2 w-1/3 max-w-[200px]">
-          <span>日期:</span>
-          <div className="flex-1 border-b border-gray-400 h-px" />
-        </div>
-      </div>
-
-      <hr className="border-gray-200" />
+    <PrintPageLayout>
+      <PrintPageLayout.CenteredHeader
+        title={`${data.title} 抄写练习`}
+        courseTitle={course?.title}
+      />
 
       <Section title="I. 单词抄写">
         {words.map((word, idx) => (
@@ -75,11 +65,7 @@ function SentenceCopy() {
           ))}
         </Section>
       )}
-      {/* 
-      <footer className="mt-auto border-t border-gray-200 text-center text-gray-500 pt-4">
-        第1页
-      </footer> */}
-    </div>
+    </PrintPageLayout>
   );
 }
 

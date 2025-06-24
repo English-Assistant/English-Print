@@ -26,7 +26,12 @@ export const Route = createFileRoute('/_manage/paper-detail/$id')({
   component: PaperDetailPage,
 });
 
-type SectionKey = 'preclass' | 'copyJson' | 'examJson' | 'answerJson';
+type SectionKey =
+  | 'preclass'
+  | 'listeningMaterial'
+  | 'copyJson'
+  | 'examJson'
+  | 'answerJson';
 
 function PaperDetailPage() {
   const { token } = theme.useToken();
@@ -75,11 +80,18 @@ function PaperDetailPage() {
       viewPath: '/preclass-guide/$id',
       description: '课前预习指导，包含学习目标和重点内容',
     },
+
     {
       key: 'copyJson',
       title: '抄写练习',
       viewPath: '/sentence-copy/$id',
       description: '句子抄写练习，帮助学生掌握句型结构',
+    },
+    {
+      key: 'listeningMaterial',
+      title: '听力素材',
+      viewPath: '', // 暂无预览
+      description: '试卷配套的听力原文或补充材料',
     },
     {
       key: 'examJson',
@@ -116,7 +128,7 @@ function PaperDetailPage() {
               {paper.title}
             </Typography.Title>
             <Tag color="blue">
-              {courses.find((c) => c.id === paper.courseId)?.name}
+              {courses.find((c) => c.id === paper.courseId)?.title}
             </Tag>
           </Space>
         </Space>

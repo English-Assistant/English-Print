@@ -1,36 +1,46 @@
-import {
-  Modal,
-  Form,
-  Input,
-  Select,
-  message,
-  theme,
-  Typography,
-  Space,
-  Alert,
-} from 'antd';
-import { FileTextOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, Select, message, theme, Alert } from 'antd';
 import { usePaperStore, useCourseStore } from '@/stores';
+import { useEffect } from 'react';
+import type { Paper } from '@/data/types/paper';
+import type { Course } from '@/data/types/course';
 
 interface Props {
   open: boolean;
+  editingId: string | null;
   onClose: () => void;
 }
 
-/** 新建试卷弹窗 */
-export default function NewPaperModal({ open, onClose }: Props) {
-  const { addPaper } = usePaperStore();
+type FormValues = Omit<Paper, 'id' | 'updatedAt'>;
+
+/** 新建/编辑试卷弹窗 */
+export default function NewPaperModal({ open, editingId, onClose }: Props) {
+  const { papers, addPaper, updatePaper } = usePaperStore();
   const { courses } = useCourseStore();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormValues>();
   const { token } = theme.useToken();
+
+  useEffect(() => {
+    if (open && editingId) {
+      const paper = papers.find((p) => p.id === editingId);
+      if (paper) {
+        form.setFieldsValue(paper);
+      }
+    } else {
+      form.resetFields();
+    }
+  }, [open, editingId, papers, form]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      addPaper(values);
-      message.success('新建成功');
+      if (editingId) {
+        updatePaper(editingId, values);
+        message.success('更新成功');
+      } else {
+        addPaper(values);
+        message.success('新建成功');
+      }
       onClose();
-      form.resetFields();
     } catch {
       /* ignore */
     }
@@ -39,67 +49,53 @@ export default function NewPaperModal({ open, onClose }: Props) {
   return (
     <Modal
       open={open}
-      title={
-        <Space>
-          <FileTextOutlined />
-          <Typography.Text strong>新建试卷</Typography.Text>
-        </Space>
-      }
+      title={editingId ? '编辑试卷' : '新建试卷'}
       width={640}
       style={{ top: 20 }}
-      styles={{ body: { padding: '24px 24px 8px' } }}
+      // styles={{ body: { padding: '24px 24px 8px' } }}
       onOk={handleOk}
       onCancel={onClose}
       okText="确定"
       cancelText="取消"
     >
       <Alert
-        message="创建试卷后，您可以在试卷详情页配置导读、抄写练习、试卷内容和答案。"
+        message={
+          editingId
+            ? '您正在编辑试卷的基本信息。'
+            : '创建试卷后，您可以在试卷详情页配置导读、抄写练习、试卷内容和答案。'
+        }
         type="info"
         showIcon
         style={{ marginBottom: 24 }}
       />
-      <Form
-        form={form}
-        layout="vertical"
-        requiredMark="optional"
-        initialValues={{ remark: '' }}
-      >
-        <Form.Item
+      <Form form={form} layout="vertical" initialValues={{ remark: '' }}>
+        <Form.Item<FormValues>
           name="title"
           label="试卷标题"
           rules={[{ required: true, message: '请输入试卷标题' }]}
         >
-          <Input
-            placeholder="请输入试卷标题"
-            autoFocus
-            showCount
-            maxLength={50}
-          />
+          <Input placeholder="请输入试卷标题" autoFocus />
         </Form.Item>
-        <Form.Item
+        <Form.Item<FormValues>
           label="所属课程"
           name="courseId"
           rules={[{ required: true, message: '请选择所属课程' }]}
         >
           <Select
             placeholder="请选择所属课程"
-            options={courses.map((c) => ({ value: c.id, label: c.name }))}
+            options={courses.map((c: Course) => ({
+              value: c.id,
+              label: c.title,
+            }))}
             showSearch
             optionFilterProp="label"
             style={{ width: '100%' }}
           />
         </Form.Item>
-        <Form.Item
-          name="remark"
-          label="备注"
-          help="可选填，用于记录试卷的补充信息"
-        >
+        <Form.Item<FormValues> name="remark" label="备注">
           <Input.TextArea
             placeholder="请输入备注信息..."
             rows={3}
-            showCount
-            maxLength={200}
             style={{ backgroundColor: token.colorFillTertiary }}
           />
         </Form.Item>

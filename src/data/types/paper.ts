@@ -6,7 +6,7 @@ import type { CopyPracticeSheet } from './copy';
 
 /**
  * @file
- * @description 定义了“试卷记录”的数据结构。
+ * @description 定义了"试卷记录"的数据结构。
  * 这是一个数据库记录级别的类型，它聚合了试卷、答案和练习等多种JSON内容。
  */
 
@@ -25,6 +25,9 @@ export interface Paper {
 
   /** 课程导读内容（Markdown文本，可选） */
   preclass?: string;
+
+  /** 听力材料（可选） */
+  listeningMaterial?: string;
 
   /** [类型优化] 抄写练习的JSON数据 */
   copyJson?: CopyPracticeSheet;
