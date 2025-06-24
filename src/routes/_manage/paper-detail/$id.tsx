@@ -9,7 +9,8 @@ import {
   Col,
   Tag,
   Popconfirm,
-  message,
+  App,
+  Modal,
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -40,8 +41,9 @@ function PaperDetailPage() {
   const params = Route.useParams();
   const paper = papers.find((p) => p.id === params.id);
   const [editingKey, setEditingKey] = useState<SectionKey | null>(null);
+  const [listeningPreviewVisible, setListeningPreviewVisible] = useState(false);
   const navigate = useNavigate();
-
+  const { message } = App.useApp();
   if (!paper) {
     return (
       <Card
@@ -137,6 +139,7 @@ function PaperDetailPage() {
       <Row gutter={[16, 16]}>
         {sectionConfigs.map((section) => {
           const hasData = Boolean(paper[section.key]);
+          const isListeningMaterial = section.key === 'listeningMaterial';
           return (
             <Col key={section.key} xs={24} sm={12}>
               <Card
@@ -166,13 +169,16 @@ function PaperDetailPage() {
                         key="view"
                         type="text"
                         icon={<EyeOutlined />}
-                        onClick={() =>
-                          navigate({
-                            to: section.viewPath,
-                            params: { id: paper.id },
-                          })
-                        }
-                        style={{ width: '33.33%' }}
+                        onClick={() => {
+                          if (isListeningMaterial) {
+                            setListeningPreviewVisible(true);
+                          } else {
+                            navigate({
+                              to: section.viewPath,
+                              params: { id: paper.id },
+                            });
+                          }
+                        }}
                       >
                         预览
                       </Button>,
@@ -181,7 +187,6 @@ function PaperDetailPage() {
                         type="text"
                         icon={<EditOutlined />}
                         onClick={() => setEditingKey(section.key)}
-                        style={{ width: '33.33%' }}
                       >
                         编辑
                       </Button>,
@@ -193,12 +198,7 @@ function PaperDetailPage() {
                         okText="确定"
                         cancelText="取消"
                       >
-                        <Button
-                          type="text"
-                          danger
-                          icon={<DeleteOutlined />}
-                          style={{ width: '100%' }}
-                        >
+                        <Button type="text" danger icon={<DeleteOutlined />}>
                           删除
                         </Button>
                       </Popconfirm>,
@@ -241,6 +241,28 @@ function PaperDetailPage() {
         sectionKey={editingKey}
         onClose={() => setEditingKey(null)}
       />
+
+      <Modal
+        title="听力素材"
+        open={listeningPreviewVisible}
+        onCancel={() => setListeningPreviewVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setListeningPreviewVisible(false)}>
+            关闭
+          </Button>,
+        ]}
+        forceRender={true}
+      >
+        <Typography.Paragraph
+          style={{
+            whiteSpace: 'pre-wrap',
+            maxHeight: '60vh',
+            overflowY: 'auto',
+          }}
+        >
+          {paper.listeningMaterial}
+        </Typography.Paragraph>
+      </Modal>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Select, message, theme, Alert } from 'antd';
+import { Modal, Form, Input, Select, theme, Alert, App } from 'antd';
 import { usePaperStore, useCourseStore } from '@/stores';
 import { useEffect } from 'react';
 import type { Paper } from '@/data/types/paper';
@@ -18,6 +18,7 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
   const { courses } = useCourseStore();
   const [form] = Form.useForm<FormValues>();
   const { token } = theme.useToken();
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (open && editingId) {
@@ -57,6 +58,7 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
       onCancel={onClose}
       okText="确定"
       cancelText="取消"
+      forceRender={true}
     >
       <Alert
         message={

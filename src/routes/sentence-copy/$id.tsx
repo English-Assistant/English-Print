@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useCourseStore, usePaperStore } from '@/stores';
 import PrintPageLayout from '@/components/PrintPageLayout';
+import { useTitle } from 'ahooks';
 
 export const Route = createFileRoute('/sentence-copy/$id')({
   component: SentenceCopy,
@@ -13,13 +14,14 @@ function SentenceCopy() {
     state.getCourseById(paper?.courseId ?? ''),
   );
 
+  const title = `${paper?.title} 抄写练习`;
+  useTitle(title);
+
   if (!paper) {
     return <div className="p-6">未找到试卷</div>;
   }
 
   const data = paper.copyJson;
-
-  console.log(data, paper);
 
   if (!data) return <div className="p-6">暂无抄写数据</div>;
 
@@ -30,7 +32,7 @@ function SentenceCopy() {
   return (
     <PrintPageLayout>
       <PrintPageLayout.CenteredHeader
-        title={`${data.title} 抄写练习`}
+        title={title}
         courseTitle={course?.title}
       />
 
@@ -92,7 +94,9 @@ interface CopyLineProps {
 }
 function CopyLine({ index, content, withExtraTop, lines = 1 }: CopyLineProps) {
   return (
-    <div className={`flex flex-col px-6${withExtraTop ? ' mt-4' : ' mt-0'}`}>
+    <div
+      className={`flex flex-col text-black px-6${withExtraTop ? ' mt-4' : ' mt-0'}`}
+    >
       <div className="flex items-center gap-4 border-b border-gray-400 pb-1">
         <span>{index}.</span>
         <span className="op30">{content}</span>

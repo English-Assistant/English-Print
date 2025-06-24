@@ -4,7 +4,7 @@ import {
   Modal,
   Form,
   Input,
-  message,
+  App,
   theme,
   Typography,
   Space,
@@ -15,17 +15,11 @@ import VanillaJsonEditor, {
   type JsonEditorHandle,
 } from '@/components/VanillaJsonEditor';
 import { usePaperStore } from '@/stores';
-import Ajv2020 from 'ajv/dist/2020';
-import draft7Meta from 'ajv/dist/refs/json-schema-draft-07.json';
-import examSchema from '@/data/schema/exam.schema.json';
-import answerSchema from '@/data/schema/answer.schema.json';
-import copySchema from '@/data/schema/copy.schema.json';
-
-const ajv = new Ajv2020();
-ajv.addMetaSchema(draft7Meta);
-const validateExam = ajv.compile(examSchema as object);
-const validateAnswer = ajv.compile(answerSchema as object);
-const validateCopy = ajv.compile(copySchema as object);
+import {
+  validateAnswer,
+  validateCopy,
+  validateExam,
+} from '@/utils/schemaValidators';
 
 export type SectionKey =
   | 'preclass'
@@ -51,7 +45,7 @@ export default function SectionEditModal({
   const [form] = Form.useForm();
   const { token } = theme.useToken();
   const editorRef = useRef<JsonEditorHandle>(null);
-
+  const { message } = App.useApp();
   useEffect(() => {
     if (open) {
       const paper = papers.find((p) => p.id === paperId);
@@ -138,6 +132,7 @@ export default function SectionEditModal({
           </>
         );
       }}
+      forceRender={true}
     >
       <Form
         form={form}

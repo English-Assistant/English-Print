@@ -5,8 +5,9 @@ import { useCourseStore } from '@/stores';
 import { Alert } from 'antd';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import 'github-markdown-css/github-markdown.css';
+import 'github-markdown-css/github-markdown-light.css';
 import PrintPageLayout from '@/components/PrintPageLayout';
+import { useTitle } from 'ahooks';
 
 /* =================================================================
  *  页面布局优化:
@@ -27,14 +28,15 @@ function PreclassGuidePage() {
     state.getCourseById(paperRecord?.courseId ?? ''),
   );
 
+  const title = `${paperRecord?.title} 课程导读`;
+  useTitle(title);
+
   const markdownContent = paperRecord?.preclass;
-  const title = `${paperRecord?.title || '课程'} 课程导读`;
 
   return (
     <>
-      <head>
-        <style>
-          {`
+      <style>
+        {`
           .markdown-body hr {
             display: none;
           }
@@ -42,8 +44,8 @@ function PreclassGuidePage() {
           list-style: auto;
           }
           `}
-        </style>
-      </head>
+      </style>
+
       <PrintPageLayout>
         <PrintPageLayout.LeftAlignedHeader
           title={title}

@@ -16,6 +16,12 @@ import type { Paper } from '@/data/types/paper';
 import dayjs from 'dayjs';
 import { runDifyWorkflow } from '@/apis/generation';
 import { useRequest } from 'ahooks';
+import type { GeneratedPaperData } from '@/data/types/generation';
+import { useEffect } from 'react';
+import { validateGeneratedPaperData } from '@/utils/schemaValidators';
+
+const LAST_VOCABULARY_KEY = 'english-print-last-vocabulary';
+const LAST_COURSE_ID_KEY = 'english-print-last-course-id';
 
 interface BatchNewPaperModalProps {
   open: boolean;
@@ -25,9 +31,7 @@ interface BatchNewPaperModalProps {
 interface FormValues {
   vocabulary: string;
   papers: {
-    title: string;
-    coreWords: string;
-    coreSentences: string;
+    unit: string;
     courseId?: string;
     notes?: string;
   }[];
@@ -38,29 +42,23 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
   const { message } = App.useApp();
   const { addPaper } = usePaperStore();
   const { courses } = useCourseStore();
+  const papers = Form.useWatch('papers', form);
 
-  const { runAsync: handleBatchCreate, loading } = useRequest(runDifyWorkflow, {
-    manual: true,
-    onSuccess: (result) => {
-      const newPapers: Paper[] = result.output.map((data) => ({
-        id: crypto.randomUUID(),
-        title: data.examPaper.title,
-        preclass: data.preClassGuide,
-        listeningMaterial: data.listeningMaterial,
-        copyJson: data.copyExercise,
-        examJson: data.examPaper,
-        answerJson: data.examAnswers,
-        updatedAt: dayjs().toISOString(),
-      }));
+  useEffect(() => {
+    if (open) {
+      const lastVocabulary = localStorage.getItem(LAST_VOCABULARY_KEY);
+      if (lastVocabulary) {
+        form.setFieldsValue({ vocabulary: lastVocabulary });
+      }
+    }
+  }, [open, form]);
 
-      newPapers.forEach(addPaper);
-      message.success(`成功新增 ${newPapers.length} 份试卷！`);
-      handleClose();
+  const { runAsync: generateSinglePaper, loading } = useRequest(
+    runDifyWorkflow,
+    {
+      manual: true,
     },
-    onError: (error) => {
-      message.error(`新增失败: ${error.message}`);
-    },
-  });
+  );
 
   const handleFinish = async (values: FormValues) => {
     if (!values.papers || values.papers.length === 0) {
@@ -68,21 +66,81 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
       return;
     }
 
-    const payload = {
-      vocabulary: values.vocabulary,
-      papers: values.papers.map((p) => ({
-        title: p.title,
-        core_words: p.coreWords.split(/[,\\s]+/).filter(Boolean),
-        core_sentences: p.coreSentences.split('\\n').filter(Boolean),
-        course_id: p.courseId,
-        notes: p.notes,
-      })),
-    };
+    try {
+      const paperChunks: FormValues['papers'][] = [];
+      const concurrency = 3;
+      for (let i = 0; i < values.papers.length; i += concurrency) {
+        paperChunks.push(values.papers.slice(i, i + concurrency));
+      }
 
-    handleBatchCreate(payload);
+      let successCount = 0;
+      const errors: string[] = [];
+
+      for (const chunk of paperChunks) {
+        const promises = chunk.map(async (paperData) => {
+          const payload = {
+            words: values.vocabulary,
+            unit: paperData.unit,
+          };
+
+          const result: GeneratedPaperData = await generateSinglePaper(payload);
+
+          const validationErrors = validateGeneratedPaperData(result);
+          if (validationErrors.length > 0) {
+            throw new Error(
+              `AI返回的数据校验失败: ${validationErrors.join('; ')}`,
+            );
+          }
+
+          const newPaper: Paper = {
+            id: crypto.randomUUID(),
+            title: result.examPaper.title,
+            preclass: result.preClassGuide,
+            listeningMaterial: result.listeningMaterial,
+            copyJson: result.copyExercise,
+            examJson: result.examPaper,
+            answerJson: result.examAnswers,
+            updatedAt: dayjs().toISOString(),
+            courseId: paperData.courseId,
+          };
+          addPaper(newPaper);
+        });
+
+        const results = await Promise.allSettled(promises);
+        results.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            successCount++;
+          } else if (result.reason instanceof Error) {
+            errors.push(result.reason.message);
+          }
+        });
+      }
+
+      if (errors.length > 0) {
+        message.error(`部分试卷生成失败: ${errors.join('; ')}`);
+      }
+      if (successCount > 0) {
+        message.success(`成功新增 ${successCount} 份试卷！`);
+        localStorage.setItem(LAST_VOCABULARY_KEY, values.vocabulary);
+        if (values.papers.length > 0) {
+          const lastPaper = values.papers[values.papers.length - 1];
+          if (lastPaper.courseId) {
+            localStorage.setItem(LAST_COURSE_ID_KEY, lastPaper.courseId);
+          }
+        }
+        handleClose();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(`新增失败: ${error.message}`);
+      } else {
+        message.error('新增过程中发生未知错误');
+      }
+    }
   };
 
   const handleClose = () => {
+    if (loading) return;
     form.resetFields();
     onClose();
   };
@@ -93,8 +151,10 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
       onCancel={handleClose}
       title="批量新增试卷"
       width={800}
+      closable={!loading}
+      maskClosable={!loading}
       footer={[
-        <Button key="back" onClick={handleClose}>
+        <Button key="back" onClick={handleClose} disabled={loading}>
           取消
         </Button>,
         <Button
@@ -103,9 +163,10 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
           loading={loading}
           onClick={() => form.submit()}
         >
-          保存
+          {loading ? '正在生成中...' : `确认生成 ${papers?.length || 0} 份试卷`}
         </Button>,
       ]}
+      forceRender={true}
     >
       <Form
         form={form}
@@ -140,45 +201,29 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
                 {fields.map(({ key, name, ...restField }) => (
                   <Card
                     key={key}
-                    bodyStyle={{ padding: '16px' }}
+                    styles={{ body: { padding: '16px' } }}
                     style={{ marginBottom: 16 }}
                   >
                     <Row gutter={16}>
                       <Col span={23}>
                         <Form.Item
                           {...restField}
-                          name={[name, 'title']}
-                          label="单元标题"
+                          name={[name, 'unit']}
+                          label="单元内容"
                           rules={[
-                            { required: true, message: '请输入单元标题' },
-                          ]}
-                        >
-                          <Input placeholder="例如: Unit 3 Seasons" />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'coreWords']}
-                          label="核心单词 (本单元)"
-                          rules={[
-                            { required: true, message: '请输入核心单词' },
+                            { required: true, message: '请输入单元内容' },
                           ]}
                         >
                           <Input.TextArea
-                            rows={3}
-                            placeholder="例如: Spring, Summer, Autumn, Winter"
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'coreSentences']}
-                          label="重点句型"
-                          rules={[
-                            { required: true, message: '请输入重点句型' },
-                          ]}
-                        >
-                          <Input.TextArea
-                            rows={3}
-                            placeholder="每行一个句型，例如: What's your favorite season?"
+                            rows={8}
+                            placeholder="- 单元标题
+[Unit 3 Seasons]
+
+- 核心单词
+[Spring, Summer, Autumn, Winter]
+
+- 重点句型
+[What's your favorite season?]"
                           />
                         </Form.Item>
                         <Form.Item
@@ -225,7 +270,11 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
               <Form.Item style={{ marginTop: 8 }}>
                 <Button
                   type="dashed"
-                  onClick={() => add()}
+                  onClick={() => {
+                    const lastCourseId =
+                      localStorage.getItem(LAST_COURSE_ID_KEY);
+                    add({ courseId: lastCourseId ?? undefined }, 0);
+                  }}
                   block
                   icon={<PlusOutlined />}
                 >

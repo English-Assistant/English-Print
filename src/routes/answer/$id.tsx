@@ -1,9 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useCourseStore, usePaperStore } from '@/stores';
 import AnswerSheetViewer from '@/components/AnswerSheetViewer';
-import type { ExamPaper } from '@/data/types/exam';
-import type { ExamAnswerSheet } from '@/data/types/answer';
 import PrintPageLayout from '@/components/PrintPageLayout';
+import { useTitle } from 'ahooks';
 
 export const Route = createFileRoute('/answer/$id')({
   component: Answer,
@@ -16,30 +15,24 @@ function Answer() {
     state.getCourseById(paper?.courseId ?? ''),
   );
 
+  const title = `${paper?.title} 答案卡`;
+
+  useTitle(title);
+
   if (!paper) return <div className="p-6">未找到试卷</div>;
 
   if (!paper.examJson || !paper.answerJson) {
-    return <div className="p-6 text-red-600">答案 JSON 解析失败</div>;
+    return <div className="p-6">试卷或答案数据不完整</div>;
   }
-
-  let exam: ExamPaper;
-  let answerSheet: ExamAnswerSheet;
-  try {
-    exam = paper.examJson;
-    answerSheet = paper.answerJson;
-  } catch (err) {
-    console.error(err);
-    return <div className="p-6 text-red-600">答案 JSON 解析失败</div>;
-  }
-
+  const exam = paper.examJson;
+  const answerSheet = paper.answerJson;
   return (
     <PrintPageLayout>
       <PrintPageLayout.CenteredHeader
-        title={paper.answerJson.title}
+        title={title}
         courseTitle={course?.title}
         showStudentName={false}
       />
-
       {/* 答案主体 */}
       <AnswerSheetViewer exam={exam} answer={answerSheet} />
 

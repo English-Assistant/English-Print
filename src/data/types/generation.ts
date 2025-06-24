@@ -32,9 +32,39 @@ export interface GeneratedPaperData {
  * 批量新增试卷接口的API响应体结构。
  */
 export interface ApiBatchNewPaperResponse {
-  /**
-   * 生成的数据数组，因为是批量操作，所以返回一个列表。
-   * `output` 这个键名是根据Dify平台调试时返回的结构确定的。
-   */
-  output: GeneratedPaperData[];
+  task_id: string;
+  workflow_run_id: string;
+  data: {
+    // id (string) workflow 执行 ID
+    // workflow_id (string) 关联 Workflow ID
+    // status (string) 执行状态, running / succeeded / failed / stopped
+    // outputs (json) Optional 输出内容
+    // error (string) Optional 错误原因
+    // elapsed_time (float) Optional 耗时(s)
+    // total_tokens (int) Optional 总使用 tokens
+    // total_steps (int) 总步数（冗余），默认 0
+    // created_at (timestamp) 开始时间
+    // finished_at (timestamp) 结束时间
+
+    id: string;
+    workflow_id: string;
+    status: string;
+    outputs: {
+      output: GeneratedPaperData;
+    };
+    error?: string;
+  };
 }
+
+export interface ErrorResponse {
+  code: string;
+  message: string;
+  status: number;
+}
+
+// 接口错误响应
+// {
+//   "code": "invalid_param",
+//   "message": "unit is required in input form",
+//   "status": 400
+// }

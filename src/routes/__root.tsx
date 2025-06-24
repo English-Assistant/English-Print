@@ -2,7 +2,7 @@ import useIsPrinting from '@/hooks/useIsPrinting';
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-import { ConfigProvider, theme, FloatButton } from 'antd';
+import { ConfigProvider, theme, FloatButton, App } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import 'dayjs/locale/zh-cn';
 import zhCN from 'antd/locale/zh_CN';
@@ -25,7 +25,9 @@ export function Root() {
         }}
         locale={zhCN}
       >
-        <Outlet />
+        <App>
+          <Outlet />
+        </App>
         {import.meta.env.DEV && !isPrinting && <TanStackRouterDevtools />}
       </ConfigProvider>
       {!isPrinting && (

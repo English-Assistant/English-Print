@@ -1,21 +1,22 @@
-import { Modal, Form, Input, theme, message } from 'antd';
+import { Modal, Form, Input, theme, App } from 'antd';
 import { useCourseStore } from '@/stores';
 import { useEffect } from 'react';
 import type { Course } from '@/data/types/course';
 
 interface Props {
   open: boolean;
-  editingId: string | null;
+  editingId?: string | null;
   onClose: () => void;
 }
 
-type FormValues = Omit<Course, 'id' | 'createdAt'>;
+type FormValues = Omit<Course, 'id'>;
 
 export default function NewCourseModal({ open, editingId, onClose }: Props) {
   const { token } = theme.useToken();
   const { courses, addCourse, updateCourse } = useCourseStore();
   const [form] = Form.useForm<FormValues>();
 
+  const { message } = App.useApp();
   useEffect(() => {
     if (open && editingId) {
       const course = courses.find((c) => c.id === editingId);

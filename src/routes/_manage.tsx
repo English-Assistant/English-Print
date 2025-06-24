@@ -21,8 +21,8 @@ function ManageLayout() {
   const { pathname } = useLocation();
 
   const getCurrentKey = () => {
-    if (pathname.startsWith('/_manage/courses')) return '/courses';
-    if (pathname.startsWith('/_manage/settings')) return '/settings';
+    if (pathname.startsWith('/courses')) return '/courses';
+    if (pathname.startsWith('/settings')) return '/settings';
     return '/';
   };
   const selectedKey = getCurrentKey();

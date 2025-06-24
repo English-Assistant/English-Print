@@ -9,9 +9,9 @@ import {
   Space,
   Tag,
   Popconfirm,
-  message,
   Input,
   Empty,
+  App,
 } from 'antd';
 import {
   PlusOutlined,
@@ -35,10 +35,11 @@ function CoursesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
+  const { message } = App.useApp();
 
-  const filtered = courses.filter((c) =>
-    c.title.toLowerCase().includes(keyword.toLowerCase()),
-  );
+  const filtered = courses
+    .filter((c) => c.title.toLowerCase().includes(keyword.toLowerCase()))
+    .sort((a, b) => dayjs(b.createdAt).unix() - dayjs(a.createdAt).unix());
 
   const handleDelete = (id: string) => {
     deleteCourse(id);
@@ -48,13 +49,13 @@ function CoursesPage() {
   return (
     <div>
       <Card
-        title="课程管理"
-        variant="outlined"
         style={{
           borderRadius: token.borderRadiusLG,
           boxShadow: token.boxShadowTertiary,
+          marginBottom: 24,
         }}
-        extra={
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <Space size="middle">
             <Input.Search
               allowClear
@@ -63,6 +64,8 @@ function CoursesPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
             />
+          </Space>
+          <Space>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -71,92 +74,88 @@ function CoursesPage() {
               新建课程
             </Button>
           </Space>
-        }
-      >
-        {filtered.length === 0 ? (
-          <Empty
-            description="暂无课程，请点击右上角新建"
-            style={{ padding: '32px 0' }}
-          />
-        ) : (
-          <Row gutter={[24, 24]} style={{ marginTop: -8 }}>
-            {filtered.map((course) => (
-              <Col key={course.id} xs={24} sm={12} lg={8}>
-                <Card
-                  hoverable
-                  styles={{ body: { padding: 20 } }}
-                  style={{ height: '100%' }}
-                  actions={[
-                    <Button
-                      key="edit"
-                      type="text"
-                      onClick={() => setEditingId(course.id)}
-                      style={{ width: '100%', color: token.colorPrimary }}
-                    >
-                      <Space>
-                        <EditOutlined />
-                        编辑
-                      </Space>
-                    </Button>,
-                    <Popconfirm
-                      key="delete"
-                      title="确认删除?"
-                      description="删除后不可恢复，确定要删除吗？"
-                      onConfirm={() => handleDelete(course.id)}
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <Button type="text" danger style={{ width: '100%' }}>
-                        <Space>
-                          <DeleteOutlined />
-                          删除
-                        </Space>
-                      </Button>
-                    </Popconfirm>,
-                  ]}
-                >
-                  <Space
-                    direction="vertical"
-                    style={{ width: '100%' }}
-                    size={12}
+        </div>
+      </Card>
+
+      {filtered.length === 0 ? (
+        <Empty
+          description="暂无课程，请点击右上角新建"
+          style={{ padding: '64px 0' }}
+        />
+      ) : (
+        <Row gutter={[24, 24]}>
+          {filtered.map((course) => (
+            <Col key={course.id} xs={24} sm={12} lg={8}>
+              <Card
+                hoverable
+                styles={{ body: { padding: 20 } }}
+                style={{ height: '100%' }}
+                actions={[
+                  <Button
+                    key="edit"
+                    type="text"
+                    onClick={() => setEditingId(course.id)}
+                    style={{ width: '100%', color: token.colorPrimary }}
                   >
-                    <Typography.Title
-                      level={5}
+                    <Space>
+                      <EditOutlined />
+                      编辑
+                    </Space>
+                  </Button>,
+                  <Popconfirm
+                    key="delete"
+                    title="确认删除?"
+                    description="删除后不可恢复，确定要删除吗？"
+                    onConfirm={() => handleDelete(course.id)}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button type="text" danger style={{ width: '100%' }}>
+                      <Space>
+                        <DeleteOutlined />
+                        删除
+                      </Space>
+                    </Button>
+                  </Popconfirm>,
+                ]}
+              >
+                <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                  <Typography.Title
+                    level={5}
+                    ellipsis={{ rows: 2 }}
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Space>
+                      <BookOutlined />
+                      {course.title}
+                    </Space>
+                  </Typography.Title>
+                  <Space
+                    size={4}
+                    style={{
+                      color: token.colorTextSecondary,
+                      fontSize: token.fontSizeSM,
+                    }}
+                  >
+                    <ClockCircleOutlined />
+                    {dayjs(course.createdAt).format('YYYY-MM-DD HH:mm')}
+                  </Space>
+                  {course.description && (
+                    <Typography.Paragraph
+                      type="secondary"
                       ellipsis={{ rows: 2 }}
                       style={{ marginBottom: 0 }}
                     >
-                      <Space>
-                        <BookOutlined />
-                        {course.title}
-                      </Space>
-                    </Typography.Title>
-                    <Space
-                      size={4}
-                      style={{
-                        color: token.colorTextSecondary,
-                        fontSize: token.fontSizeSM,
-                      }}
-                    >
-                      <ClockCircleOutlined />
-                      {dayjs().format('YYYY-MM-DD HH:mm')}
-                    </Space>
-                    {course.description && (
-                      <Typography.Paragraph
-                        type="secondary"
-                        ellipsis={{ rows: 2 }}
-                        style={{ marginBottom: 0 }}
-                      >
-                        {course.description}
-                      </Typography.Paragraph>
-                    )}
-                    <Tag color="blue">{course.id}</Tag>
-                  </Space>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
-      </Card>
+                      {course.description}
+                    </Typography.Paragraph>
+                  )}
+                  <Tag color="blue">{course.id}</Tag>
+                </Space>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
 
       <NewCourseModal
         open={isNewModalOpen || editingId !== null}
