@@ -12,6 +12,12 @@ import type { CopyPracticeSheet } from './copy';
  * 这对应了我们精心设计的Prompt的输出结构。
  */
 export interface GeneratedPaperData {
+  /** 单元标题 */
+  title?: string;
+  /** 核心单词，逗号分隔 */
+  coreWords?: string;
+  /** 重点句型，===分隔 */
+  keySentences?: string;
   /** 课程导读内容（Markdown文本） */
   preClassGuide: string;
 

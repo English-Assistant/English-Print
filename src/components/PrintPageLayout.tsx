@@ -21,7 +21,7 @@ function PrintPageLayout({
   className = 'pt-8 pb-12',
 }: PrintPageLayoutProps) {
   return (
-    <div className="bg-[#F9FAFB] print:bg-white p-8 font-sans">
+    <div className="bg-[#F9FAFB] print:bg-white p-8 print:p-0 font-sans">
       <div
         className={`w-[794px] mx-auto bg-white shadow-lg print:shadow-none print:w-full flex flex-col gap-4 ${className}`}
       >

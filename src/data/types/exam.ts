@@ -17,14 +17,14 @@ export interface Section {
   sectionNumber: string;
   title: string;
   points: number;
-  instructions: string;
+  instructions?: string;
   parts: Part[];
 }
 
 // 大题内部的子部分结构类型定义
 export interface Part {
   partNumber: string;
-  instructions: string;
+  instructions?: string;
   content: Question[];
 }
 

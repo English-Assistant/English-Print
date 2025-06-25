@@ -16,7 +16,9 @@ import type { GeneratedPaperData } from '@/data/types/generation';
 import type { Paper } from '@/data/types/paper';
 import dayjs from 'dayjs';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { validateGeneratedPaperData } from '@/utils/schemaValidators';
+import VanillaJsonEditor from '@/components/VanillaJsonEditor';
+import Ajv2020 from 'ajv/dist/2020';
+import difySchema from '@/data/schema/dify.schema.json';
 
 interface BatchNewPaperJsonModalProps {
   open: boolean;
@@ -42,6 +44,28 @@ function BatchNewPaperJsonModal({
   const [loading, setLoading] = useState(false);
   const papers = Form.useWatch('papers', form);
 
+  // 创建并编译统一的校验器
+  const ajv = new Ajv2020();
+  const validateSchema = ajv.compile(difySchema);
+
+  // 自定义校验规则
+  const jsonValidator = (_: unknown, value: unknown) => {
+    if (!value || Object.keys(value).length === 0) {
+      // 由 required 规则处理空值，这里直接通过
+      return Promise.resolve();
+    }
+    if (!validateSchema(value)) {
+      const errorMessages =
+        validateSchema.errors
+          ?.map((e) => `  - ${e.instancePath || 'root'}: ${e.message}`)
+          .join('\\n') ?? '未知校验错误';
+      // 使用 pre-wrap 来处理换行，以便在 message.error 中正确显示
+      const errorMessage = `JSON Schema 校验失败:\\n${errorMessages}`;
+      return Promise.reject(new Error(errorMessage));
+    }
+    return Promise.resolve();
+  };
+
   const handleFinish = async (values: FormValues) => {
     if (!values.papers || values.papers.length === 0) {
       message.warning('请至少添加一个要导入的试卷');
@@ -50,44 +74,26 @@ function BatchNewPaperJsonModal({
     setLoading(true);
 
     const newPapers: Paper[] = [];
-    const errors: string[] = [];
 
-    for (const [index, item] of values.papers.entries()) {
-      try {
-        if (!item.jsonData) {
-          throw new Error('JSON数据不能为空');
-        }
-        const generatedData: GeneratedPaperData = JSON.parse(item.jsonData);
+    for (const item of values.papers) {
+      // 此时的 jsonData 已经是经过表单校验的、有效的对象
+      const generatedData = item.jsonData as unknown as GeneratedPaperData;
 
-        const validationErrors = validateGeneratedPaperData(generatedData);
-        if (validationErrors.length > 0) {
-          throw new Error(
-            `JSON Schema 校验失败: ${validationErrors.join('; ')}`,
-          );
-        }
-
-        if (!generatedData.examPaper?.title) {
-          throw new Error('JSON数据中缺少试卷标题 (examPaper.title)');
-        }
-
-        const newPaper: Paper = {
-          id: crypto.randomUUID(),
-          title: generatedData.examPaper.title,
-          preclass: generatedData.preClassGuide,
-          listeningMaterial: generatedData.listeningMaterial,
-          copyJson: generatedData.copyExercise,
-          examJson: generatedData.examPaper,
-          answerJson: generatedData.examAnswers,
-          updatedAt: dayjs().toISOString(),
-          courseId: item.courseId,
-          remark: item.remark,
-        };
-        newPapers.push(newPaper);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : '未知解析错误';
-        errors.push(`第 ${index + 1} 项导入失败: ${errorMessage}`);
-      }
+      const newPaper: Paper = {
+        id: crypto.randomUUID(),
+        title: generatedData.title!,
+        coreWords: generatedData.coreWords,
+        keySentences: generatedData.keySentences,
+        preclass: generatedData.preClassGuide,
+        listeningMaterial: generatedData.listeningMaterial,
+        copyJson: generatedData.copyExercise,
+        examJson: generatedData.examPaper,
+        answerJson: generatedData.examAnswers,
+        updatedAt: dayjs().toISOString(),
+        courseId: item.courseId,
+        remark: item.remark,
+      };
+      newPapers.push(newPaper);
     }
 
     if (newPapers.length > 0) {
@@ -95,15 +101,7 @@ function BatchNewPaperJsonModal({
       message.success(`成功导入 ${newPapers.length} 份试卷！`);
     }
 
-    if (errors.length > 0) {
-      // 使用 pre-wrap 来处理换行
-      message.error(<pre style={{ margin: 0 }}>{errors.join('\\n')}</pre>, 5);
-    }
-
-    if (errors.length === 0) {
-      handleClose();
-    }
-
+    handleClose();
     setLoading(false);
   };
 
@@ -184,12 +182,10 @@ function BatchNewPaperJsonModal({
                           label="单份试卷JSON数据"
                           rules={[
                             { required: true, message: '请输入JSON数据' },
+                            { validator: jsonValidator },
                           ]}
                         >
-                          <Input.TextArea
-                            rows={10}
-                            placeholder="请在此处粘贴单份试卷的JSON数据..."
-                          />
+                          <VanillaJsonEditor />
                         </Form.Item>
                         <Form.Item
                           {...restField}

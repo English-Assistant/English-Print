@@ -1,0 +1,257 @@
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the unit, directly from user input."
+    },
+    "coreWords": {
+      "type": "string",
+      "description": "The core words for the unit, comma-separated."
+    },
+    "keySentences": {
+      "type": "string",
+      "description": "The key sentences for the unit, separated by '==='."
+    },
+    "preClassGuide": {
+      "type": "string",
+      "description": "The pre-class guide in Markdown format. This string should contain all the sections like theme, learning goals, grammar focus, vocabulary, common mistakes, and encouragement."
+    },
+    "listeningMaterial": {
+      "type": "string",
+      "description": "The plain text for listening practice, containing about 10 short dialogues or statements."
+    },
+    "copyExercise": {
+      "type": "object",
+      "description": "A JSON object for copy exercises, including title, words to copy, and sentences to copy/transform.",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "word_copy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sentence_copy": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sentence_transform": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "word_copy",
+        "sentence_copy",
+        "sentence_transform"
+      ],
+      "additionalProperties": false
+    },
+    "examPaper": {
+      "type": "object",
+      "description": "A JSON object representing the entire exam paper. It must strictly follow the detailed schema.",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/section"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "sections"
+      ],
+      "additionalProperties": false
+    },
+    "examAnswers": {
+      "type": "object",
+      "description": "A JSON object for the exam answers, corresponding to the examPaper. It must strictly follow the detailed schema.",
+      "properties": {
+        "paperId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/answerSection"
+          }
+        }
+      },
+      "required": [
+        "paperId",
+        "sections"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "title",
+    "coreWords",
+    "keySentences",
+    "preClassGuide",
+    "listeningMaterial",
+    "copyExercise",
+    "examPaper",
+    "examAnswers"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "section": {
+      "type": "object",
+      "properties": {
+        "sectionNumber": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "points": {
+          "type": "number"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/part"
+          }
+        }
+      },
+      "required": [
+        "sectionNumber",
+        "title",
+        "parts"
+      ],
+      "additionalProperties": false
+    },
+    "part": {
+      "type": "object",
+      "properties": {
+        "partNumber": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/question"
+          }
+        }
+      },
+      "required": [
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "question": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "QUESTION"
+        },
+        "questionType": {
+          "enum": [
+            "MULTI_SELECT_CHOICE",
+            "TRUE_FALSE",
+            "FILL_IN_BLANK",
+            "OPEN_ENDED",
+            "GUIDED_WRITING"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "questionType",
+        "data"
+      ],
+      "additionalProperties": false
+    },
+    "answerSection": {
+      "type": "object",
+      "properties": {
+        "sectionNumber": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/answerPart"
+          }
+        }
+      },
+      "required": [
+        "sectionNumber",
+        "parts"
+      ],
+      "additionalProperties": false
+    },
+    "answerPart": {
+      "type": "object",
+      "properties": {
+        "partNumber": {
+          "type": "string"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/answeredQuestion"
+          }
+        }
+      },
+      "required": [
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "answeredQuestion": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "answer": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "answer"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

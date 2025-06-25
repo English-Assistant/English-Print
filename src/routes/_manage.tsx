@@ -2,8 +2,8 @@ import {
   createFileRoute,
   Outlet,
   Link,
-  useNavigate,
   useLocation,
+  useNavigate,
 } from '@tanstack/react-router';
 import { Divider, Layout, Menu, theme, Typography } from 'antd';
 import {
@@ -13,6 +13,7 @@ import {
   DatabaseOutlined,
   ProfileOutlined,
   AppstoreOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 
@@ -22,14 +23,16 @@ export const Route = createFileRoute('/_manage')({
 
 function ManageLayout() {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   const selectedKey = (() => {
-    if (pathname.startsWith('/papers')) return '/papers';
-    if (pathname.startsWith('/courses')) return '/courses';
-    if (pathname.startsWith('/vocabulary')) return '/vocabulary';
-    if (pathname.startsWith('/data')) return '/data';
-    if (pathname.startsWith('/settings')) return '/settings';
+    const path = location.pathname.replace('/_manage', '');
+    if (path.startsWith('/papers')) return '/papers';
+    if (path.startsWith('/courses')) return '/courses';
+    if (path.startsWith('/vocabulary')) return '/vocabulary';
+    if (path.startsWith('/tasks')) return '/tasks';
+    if (path.startsWith('/data')) return '/data';
+    if (path.startsWith('/settings')) return '/settings';
     return '/papers';
   })();
 
@@ -37,13 +40,15 @@ function ManageLayout() {
     if (['/papers', '/courses', '/vocabulary'].includes(selectedKey)) {
       return ['content'];
     }
-    if (['/data', '/settings'].includes(selectedKey)) {
+    if (['/data', '/settings', '/tasks'].includes(selectedKey)) {
       return ['system'];
     }
     return ['content'];
   })();
 
-  const { token } = theme.useToken();
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
 
   const menuItems: MenuProps['items'] = [
     {
@@ -74,14 +79,19 @@ function ManageLayout() {
       label: '系统设置',
       children: [
         {
-          key: '/data',
-          icon: <DatabaseOutlined />,
-          label: <Link to="/data">数据管理</Link>,
+          key: '/tasks',
+          icon: <ClockCircleOutlined />,
+          label: <Link to="/tasks">任务管理</Link>,
         },
         {
           key: '/settings',
           icon: <SettingOutlined />,
           label: <Link to="/settings">接口设置</Link>,
+        },
+        {
+          key: '/data',
+          icon: <DatabaseOutlined />,
+          label: <Link to="/data">数据管理</Link>,
         },
       ],
     },
@@ -93,7 +103,7 @@ function ManageLayout() {
         width={264}
         style={{
           boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
-          backgroundColor: token.colorBgContainer,
+          backgroundColor: colorBgContainer,
           position: 'fixed',
           left: 0,
           top: 0,
@@ -107,7 +117,7 @@ function ManageLayout() {
             level={1}
             className="p-4 m-0!"
             style={{
-              color: token.colorPrimary,
+              color: theme.useToken().token.colorPrimary,
             }}
           >
             EnglishPrint
@@ -128,7 +138,7 @@ function ManageLayout() {
       </Layout.Sider>
       <Layout style={{ marginLeft: 264, minHeight: '100vh' }}>
         <Layout.Content
-          style={{ padding: 24, backgroundColor: token.colorBgLayout }}
+          style={{ padding: 24, backgroundColor: colorBgContainer }}
         >
           <Outlet />
         </Layout.Content>

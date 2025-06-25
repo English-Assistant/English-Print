@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ManageRouteImport } from './routes/_manage'
 import { Route as ManageIndexRouteImport } from './routes/_manage/index'
 import { Route as SentenceCopyIdRouteImport } from './routes/sentence-copy/$id'
+import { Route as PrintIdRouteImport } from './routes/print/$id'
 import { Route as PreclassGuideIdRouteImport } from './routes/preclass-guide/$id'
 import { Route as PaperIdRouteImport } from './routes/paper/$id'
 import { Route as AnswerIdRouteImport } from './routes/answer/$id'
 import { Route as ManageVocabularyIndexRouteImport } from './routes/_manage/vocabulary/index'
+import { Route as ManageTasksIndexRouteImport } from './routes/_manage/tasks/index'
 import { Route as ManageSettingsIndexRouteImport } from './routes/_manage/settings/index'
 import { Route as ManagePapersIndexRouteImport } from './routes/_manage/papers/index'
 import { Route as ManageDataIndexRouteImport } from './routes/_manage/data/index'
@@ -36,6 +38,11 @@ const SentenceCopyIdRoute = SentenceCopyIdRouteImport.update({
   path: '/sentence-copy/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrintIdRoute = PrintIdRouteImport.update({
+  id: '/print/$id',
+  path: '/print/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreclassGuideIdRoute = PreclassGuideIdRouteImport.update({
   id: '/preclass-guide/$id',
   path: '/preclass-guide/$id',
@@ -54,6 +61,11 @@ const AnswerIdRoute = AnswerIdRouteImport.update({
 const ManageVocabularyIndexRoute = ManageVocabularyIndexRouteImport.update({
   id: '/vocabulary/',
   path: '/vocabulary/',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageTasksIndexRoute = ManageTasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
   getParentRoute: () => ManageRoute,
 } as any)
 const ManageSettingsIndexRoute = ManageSettingsIndexRouteImport.update({
@@ -86,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/print/$id': typeof PrintIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
   '/paper-detail/$id': typeof ManagePaperDetailIdRoute
@@ -93,12 +106,14 @@ export interface FileRoutesByFullPath {
   '/data': typeof ManageDataIndexRoute
   '/papers': typeof ManagePapersIndexRoute
   '/settings': typeof ManageSettingsIndexRoute
+  '/tasks': typeof ManageTasksIndexRoute
   '/vocabulary': typeof ManageVocabularyIndexRoute
 }
 export interface FileRoutesByTo {
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/print/$id': typeof PrintIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
   '/paper-detail/$id': typeof ManagePaperDetailIdRoute
@@ -106,6 +121,7 @@ export interface FileRoutesByTo {
   '/data': typeof ManageDataIndexRoute
   '/papers': typeof ManagePapersIndexRoute
   '/settings': typeof ManageSettingsIndexRoute
+  '/tasks': typeof ManageTasksIndexRoute
   '/vocabulary': typeof ManageVocabularyIndexRoute
 }
 export interface FileRoutesById {
@@ -114,6 +130,7 @@ export interface FileRoutesById {
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
+  '/print/$id': typeof PrintIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/_manage/': typeof ManageIndexRoute
   '/_manage/paper-detail/$id': typeof ManagePaperDetailIdRoute
@@ -121,6 +138,7 @@ export interface FileRoutesById {
   '/_manage/data/': typeof ManageDataIndexRoute
   '/_manage/papers/': typeof ManagePapersIndexRoute
   '/_manage/settings/': typeof ManageSettingsIndexRoute
+  '/_manage/tasks/': typeof ManageTasksIndexRoute
   '/_manage/vocabulary/': typeof ManageVocabularyIndexRoute
 }
 export interface FileRouteTypes {
@@ -129,6 +147,7 @@ export interface FileRouteTypes {
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
+    | '/print/$id'
     | '/sentence-copy/$id'
     | '/'
     | '/paper-detail/$id'
@@ -136,12 +155,14 @@ export interface FileRouteTypes {
     | '/data'
     | '/papers'
     | '/settings'
+    | '/tasks'
     | '/vocabulary'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
+    | '/print/$id'
     | '/sentence-copy/$id'
     | '/'
     | '/paper-detail/$id'
@@ -149,6 +170,7 @@ export interface FileRouteTypes {
     | '/data'
     | '/papers'
     | '/settings'
+    | '/tasks'
     | '/vocabulary'
   id:
     | '__root__'
@@ -156,6 +178,7 @@ export interface FileRouteTypes {
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
+    | '/print/$id'
     | '/sentence-copy/$id'
     | '/_manage/'
     | '/_manage/paper-detail/$id'
@@ -163,6 +186,7 @@ export interface FileRouteTypes {
     | '/_manage/data/'
     | '/_manage/papers/'
     | '/_manage/settings/'
+    | '/_manage/tasks/'
     | '/_manage/vocabulary/'
   fileRoutesById: FileRoutesById
 }
@@ -171,6 +195,7 @@ export interface RootRouteChildren {
   AnswerIdRoute: typeof AnswerIdRoute
   PaperIdRoute: typeof PaperIdRoute
   PreclassGuideIdRoute: typeof PreclassGuideIdRoute
+  PrintIdRoute: typeof PrintIdRoute
   SentenceCopyIdRoute: typeof SentenceCopyIdRoute
 }
 
@@ -195,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/sentence-copy/$id'
       fullPath: '/sentence-copy/$id'
       preLoaderRoute: typeof SentenceCopyIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/print/$id': {
+      id: '/print/$id'
+      path: '/print/$id'
+      fullPath: '/print/$id'
+      preLoaderRoute: typeof PrintIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/preclass-guide/$id': {
@@ -223,6 +255,13 @@ declare module '@tanstack/react-router' {
       path: '/vocabulary'
       fullPath: '/vocabulary'
       preLoaderRoute: typeof ManageVocabularyIndexRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/_manage/tasks/': {
+      id: '/_manage/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof ManageTasksIndexRouteImport
       parentRoute: typeof ManageRoute
     }
     '/_manage/settings/': {
@@ -270,6 +309,7 @@ interface ManageRouteChildren {
   ManageDataIndexRoute: typeof ManageDataIndexRoute
   ManagePapersIndexRoute: typeof ManagePapersIndexRoute
   ManageSettingsIndexRoute: typeof ManageSettingsIndexRoute
+  ManageTasksIndexRoute: typeof ManageTasksIndexRoute
   ManageVocabularyIndexRoute: typeof ManageVocabularyIndexRoute
 }
 
@@ -280,6 +320,7 @@ const ManageRouteChildren: ManageRouteChildren = {
   ManageDataIndexRoute: ManageDataIndexRoute,
   ManagePapersIndexRoute: ManagePapersIndexRoute,
   ManageSettingsIndexRoute: ManageSettingsIndexRoute,
+  ManageTasksIndexRoute: ManageTasksIndexRoute,
   ManageVocabularyIndexRoute: ManageVocabularyIndexRoute,
 }
 
@@ -291,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnswerIdRoute: AnswerIdRoute,
   PaperIdRoute: PaperIdRoute,
   PreclassGuideIdRoute: PreclassGuideIdRoute,
+  PrintIdRoute: PrintIdRoute,
   SentenceCopyIdRoute: SentenceCopyIdRoute,
 }
 export const routeTree = rootRouteImport

@@ -56,7 +56,7 @@ function SectionView({ section }: { section: Section }) {
       </header>
 
       <div className="px-6">
-        {section.instructions && (
+        {section.instructions && section.instructions !== section.title && (
           <p className="mb-4 text-gray-700 bg-gray-50 p-3 rounded-md border border-gray-200">
             {section.instructions}
           </p>
@@ -64,7 +64,11 @@ function SectionView({ section }: { section: Section }) {
 
         <div className="flex flex-col gap-6">
           {section.parts.map((part, index) => (
-            <PartView key={part.partNumber || `part-${index}`} part={part} />
+            <PartView
+              key={part.partNumber || `part-${index}`}
+              part={part}
+              sectionTitle={section.title}
+            />
           ))}
         </div>
       </div>
@@ -72,11 +76,16 @@ function SectionView({ section }: { section: Section }) {
   );
 }
 
-function PartView({ part }: { part: Part }) {
-  // 完全保留您优化的新样式
+function PartView({
+  part,
+  sectionTitle,
+}: {
+  part: Part;
+  sectionTitle: string;
+}) {
   return (
     <div>
-      {part.instructions && (
+      {part.instructions && part.instructions !== sectionTitle && (
         <p className="mb-4 font-medium text-gray-800 bg-gray-100 px-4 py-2 rounded">
           {part.instructions}
         </p>

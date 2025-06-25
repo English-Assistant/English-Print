@@ -18,6 +18,7 @@ import {
   EyeOutlined,
   DeleteOutlined,
   SettingOutlined,
+  PrinterOutlined,
 } from '@ant-design/icons';
 import { usePaperStore, useCourseStore } from '@/stores';
 import { useState } from 'react';
@@ -122,10 +123,19 @@ function PaperDetailPage() {
           <Space>
             <Button
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate({ to: '/' })}
+              onClick={() => navigate({ to: '/papers' })}
             >
               返回列表
             </Button>
+            <Button
+              type="primary"
+              icon={<PrinterOutlined />}
+              onClick={() => window.open(`/print/${paper.id}`, '_blank')}
+            >
+              合并打印
+            </Button>
+          </Space>
+          <Space>
             <Typography.Title level={4} style={{ margin: 0 }}>
               {paper.title}
             </Typography.Title>

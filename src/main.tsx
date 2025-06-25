@@ -11,6 +11,8 @@ import 'virtual:uno.css';
 import { routeTree } from './routeTree.gen';
 import '@unocss/reset/tailwind-compat.css';
 import './styles/editor.css';
+import './styles/global.css';
+import 'github-markdown-css/github-markdown-light.css';
 
 const history =
   import.meta.env.MODE === 'production'
