@@ -10,105 +10,70 @@ import {
   Card,
   Select,
 } from 'antd';
-import { usePaperStore, useCourseStore } from '@/stores';
-import { useState } from 'react';
-import type { GeneratedPaperData } from '@/data/types/generation';
-import type { Paper } from '@/data/types/paper';
-import dayjs from 'dayjs';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { validateGeneratedPaperData } from '@/utils/schemaValidators';
+import { usePaperStore, useCourseStore } from '@/stores';
+import type { Paper } from '@/data/types/paper';
 
-interface BatchNewPaperJsonModalProps {
+const LAST_COURSE_ID_KEY = 'english-print-last-course-id';
+
+interface BatchNewPaperModalProps {
   open: boolean;
   onClose: () => void;
 }
 
 interface FormValues {
   papers: {
-    jsonData: string;
+    title: string;
+    coreWords?: string;
+    keySentences?: string;
     courseId?: string;
     remark?: string;
   }[];
 }
 
-function BatchNewPaperJsonModal({
-  open,
-  onClose,
-}: BatchNewPaperJsonModalProps) {
+function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
   const [form] = Form.useForm<FormValues>();
   const { message } = App.useApp();
   const { addPaper } = usePaperStore();
   const { courses } = useCourseStore();
-  const [loading, setLoading] = useState(false);
   const papers = Form.useWatch('papers', form);
 
   const handleFinish = async (values: FormValues) => {
     if (!values.papers || values.papers.length === 0) {
-      message.warning('请至少添加一个要导入的试卷');
+      message.warning('请至少添加一个要新增的试卷');
       return;
     }
-    setLoading(true);
 
-    const newPapers: Paper[] = [];
-    const errors: string[] = [];
-
-    for (const [index, item] of values.papers.entries()) {
-      try {
-        if (!item.jsonData) {
-          throw new Error('JSON数据不能为空');
-        }
-        const generatedData: GeneratedPaperData = JSON.parse(item.jsonData);
-
-        const validationErrors = validateGeneratedPaperData(generatedData);
-        if (validationErrors.length > 0) {
-          throw new Error(
-            `JSON Schema 校验失败: ${validationErrors.join('; ')}`,
-          );
-        }
-
-        if (!generatedData.examPaper?.title) {
-          throw new Error('JSON数据中缺少试卷标题 (examPaper.title)');
-        }
-
-        const newPaper: Paper = {
-          id: crypto.randomUUID(),
-          title: generatedData.examPaper.title,
-          preclass: generatedData.preClassGuide,
-          listeningMaterial: generatedData.listeningMaterial,
-          copyJson: generatedData.copyExercise,
-          examJson: generatedData.examPaper,
-          answerJson: generatedData.examAnswers,
-          updatedAt: dayjs().toISOString(),
-          courseId: item.courseId,
-          remark: item.remark,
+    try {
+      values.papers.forEach((paperData) => {
+        const newPaper: Omit<Paper, 'id' | 'updatedAt'> = {
+          title: paperData.title,
+          coreWords: paperData.coreWords,
+          keySentences: paperData.keySentences,
+          courseId: paperData.courseId,
+          remark: paperData.remark,
         };
-        newPapers.push(newPaper);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : '未知解析错误';
-        errors.push(`第 ${index + 1} 项导入失败: ${errorMessage}`);
+        addPaper(newPaper);
+      });
+
+      message.success(`成功新增 ${values.papers.length} 份试卷！`);
+      if (values.papers.length > 0) {
+        const lastPaper = values.papers[values.papers.length - 1];
+        if (lastPaper.courseId) {
+          localStorage.setItem(LAST_COURSE_ID_KEY, lastPaper.courseId);
+        }
+      }
+      handleClose();
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(`新增失败: ${error.message}`);
+      } else {
+        message.error('新增过程中发生未知错误');
       }
     }
-
-    if (newPapers.length > 0) {
-      newPapers.forEach(addPaper);
-      message.success(`成功导入 ${newPapers.length} 份试卷！`);
-    }
-
-    if (errors.length > 0) {
-      // 使用 pre-wrap 来处理换行
-      message.error(<pre style={{ margin: 0 }}>{errors.join('\n')}</pre>, 5);
-    }
-
-    if (errors.length === 0) {
-      handleClose();
-    }
-
-    setLoading(false);
   };
 
   const handleClose = () => {
-    if (loading) return;
     form.resetFields();
     onClose();
   };
@@ -117,21 +82,14 @@ function BatchNewPaperJsonModal({
     <Modal
       open={open}
       onCancel={handleClose}
-      title="批量新增 (JSON)"
+      title="批量新增试卷"
       width={800}
-      closable={!loading}
-      maskClosable={!loading}
       footer={[
-        <Button key="back" onClick={handleClose} disabled={loading}>
+        <Button key="back" onClick={handleClose}>
           取消
         </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={loading}
-          onClick={() => form.submit()}
-        >
-          {`确认导入 ${papers?.length || 0} 份试卷`}
+        <Button key="submit" type="primary" onClick={() => form.submit()}>
+          {`确认新增 ${papers?.length || 0} 份试卷`}
         </Button>,
       ]}
       forceRender={true}
@@ -140,15 +98,16 @@ function BatchNewPaperJsonModal({
         form={form}
         layout="vertical"
         onFinish={handleFinish}
-        initialValues={{ papers: [{}] }}
+        autoComplete="off"
       >
-        <Divider>待导入试卷列表</Divider>
+        <Divider>试卷列表</Divider>
+
         <Form.List name="papers">
           {(fields, { add, remove }) => (
             <>
               <div
                 style={{
-                  maxHeight: '50vh',
+                  maxHeight: '55vh',
                   overflowY: 'auto',
                   padding: '1px 8px',
                 }}
@@ -161,6 +120,38 @@ function BatchNewPaperJsonModal({
                   >
                     <Row gutter={16}>
                       <Col span={23}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'title']}
+                          label="单元标题"
+                          rules={[
+                            { required: true, message: '请输入单元标题' },
+                          ]}
+                        >
+                          <Input placeholder="例如: Unit 3 Seasons" />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'coreWords']}
+                          label="核心单词 (可选)"
+                        >
+                          <Input.TextArea
+                            rows={2}
+                            placeholder="例如: Spring, Summer, Autumn, Winter"
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'keySentences']}
+                          label="重点句型 (可选)"
+                        >
+                          <Input.TextArea
+                            rows={3}
+                            placeholder={
+                              "例如: What's your favorite season?\\nMy favorite season is..."
+                            }
+                          />
+                        </Form.Item>
                         <Form.Item
                           {...restField}
                           name={[name, 'courseId']}
@@ -176,19 +167,6 @@ function BatchNewPaperJsonModal({
                               label: c.title,
                               value: c.id,
                             }))}
-                          />
-                        </Form.Item>
-                        <Form.Item
-                          {...restField}
-                          name={[name, 'jsonData']}
-                          label="单份试卷JSON数据"
-                          rules={[
-                            { required: true, message: '请输入JSON数据' },
-                          ]}
-                        >
-                          <Input.TextArea
-                            rows={10}
-                            placeholder="请在此处粘贴单份试卷的JSON数据..."
                           />
                         </Form.Item>
                         <Form.Item
@@ -215,11 +193,15 @@ function BatchNewPaperJsonModal({
               <Form.Item style={{ marginTop: 8 }}>
                 <Button
                   type="dashed"
-                  onClick={() => add()}
+                  onClick={() => {
+                    const lastCourseId =
+                      localStorage.getItem(LAST_COURSE_ID_KEY);
+                    add({ courseId: lastCourseId ?? undefined }, 0);
+                  }}
                   block
                   icon={<PlusOutlined />}
                 >
-                  新增一个待导入项
+                  新增一个试卷
                 </Button>
               </Form.Item>
             </>
@@ -230,4 +212,4 @@ function BatchNewPaperJsonModal({
   );
 }
 
-export default BatchNewPaperJsonModal;
+export default BatchNewPaperModal;

@@ -20,6 +20,12 @@ export interface Paper {
   /** 关联的课程ID（可选） */
   courseId?: string;
 
+  /** 核心单词（可选，用逗号或空格分隔） */
+  coreWords?: string;
+
+  /** 重点句型（可选，用换行分隔） */
+  keySentences?: string;
+
   /** 备注信息（可选） */
   remark?: string;
 

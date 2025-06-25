@@ -6,6 +6,7 @@ import type { Course } from '@/data/types/course';
 
 interface Props {
   open: boolean;
+  // `new` 表示新建，否则为编辑的 paperId
   editingId: string | null;
   onClose: () => void;
 }
@@ -20,8 +21,10 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
   const { token } = theme.useToken();
   const { message } = App.useApp();
 
+  const isEditing = editingId && editingId !== 'new';
+
   useEffect(() => {
-    if (open && editingId) {
+    if (open && isEditing) {
       const paper = papers.find((p) => p.id === editingId);
       if (paper) {
         form.setFieldsValue(paper);
@@ -29,16 +32,19 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
     } else {
       form.resetFields();
     }
-  }, [open, editingId, papers, form]);
+  }, [open, editingId, papers, form, isEditing]);
 
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      if (editingId) {
+      if (isEditing) {
         updatePaper(editingId, values);
         message.success('更新成功');
       } else {
-        addPaper(values);
+        addPaper({
+          ...values,
+          title: values.title || '未命名试卷',
+        });
         message.success('新建成功');
       }
       onClose();
@@ -50,7 +56,7 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
   return (
     <Modal
       open={open}
-      title={editingId ? '编辑试卷' : '新建试卷'}
+      title={isEditing ? '编辑试卷' : '新建试卷'}
       width={640}
       style={{ top: 20 }}
       // styles={{ body: { padding: '24px 24px 8px' } }}
@@ -62,7 +68,7 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
     >
       <Alert
         message={
-          editingId
+          isEditing
             ? '您正在编辑试卷的基本信息。'
             : '创建试卷后，您可以在试卷详情页配置导读、抄写练习、试卷内容和答案。'
         }
@@ -70,7 +76,11 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
         showIcon
         style={{ marginBottom: 24 }}
       />
-      <Form form={form} layout="vertical" initialValues={{ remark: '' }}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ remark: '', coreWords: '', keySentences: '' }}
+      >
         <Form.Item<FormValues>
           name="title"
           label="试卷标题"
@@ -92,6 +102,20 @@ export default function NewPaperModal({ open, editingId, onClose }: Props) {
             showSearch
             optionFilterProp="label"
             style={{ width: '100%' }}
+          />
+        </Form.Item>
+        <Form.Item<FormValues> name="coreWords" label="核心单词 (可选)">
+          <Input.TextArea
+            placeholder="请输入核心单词，用逗号或空格分隔"
+            rows={2}
+            style={{ backgroundColor: token.colorFillTertiary }}
+          />
+        </Form.Item>
+        <Form.Item<FormValues> name="keySentences" label="重点句型 (可选)">
+          <Input.TextArea
+            placeholder="请输入重点句型，每句一行"
+            rows={3}
+            style={{ backgroundColor: token.colorFillTertiary }}
           />
         </Form.Item>
         <Form.Item<FormValues> name="remark" label="备注">

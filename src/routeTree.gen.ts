@@ -15,9 +15,11 @@ import { Route as SentenceCopyIdRouteImport } from './routes/sentence-copy/$id'
 import { Route as PreclassGuideIdRouteImport } from './routes/preclass-guide/$id'
 import { Route as PaperIdRouteImport } from './routes/paper/$id'
 import { Route as AnswerIdRouteImport } from './routes/answer/$id'
-import { Route as ManageSettingsRouteImport } from './routes/_manage/settings'
-import { Route as ManageDataRouteImport } from './routes/_manage/data'
-import { Route as ManageCoursesRouteImport } from './routes/_manage/courses'
+import { Route as ManageVocabularyIndexRouteImport } from './routes/_manage/vocabulary/index'
+import { Route as ManageSettingsIndexRouteImport } from './routes/_manage/settings/index'
+import { Route as ManagePapersIndexRouteImport } from './routes/_manage/papers/index'
+import { Route as ManageDataIndexRouteImport } from './routes/_manage/data/index'
+import { Route as ManageCoursesIndexRouteImport } from './routes/_manage/courses/index'
 import { Route as ManagePaperDetailIdRouteImport } from './routes/_manage/paper-detail/$id'
 
 const ManageRoute = ManageRouteImport.update({
@@ -49,19 +51,29 @@ const AnswerIdRoute = AnswerIdRouteImport.update({
   path: '/answer/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ManageSettingsRoute = ManageSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const ManageVocabularyIndexRoute = ManageVocabularyIndexRouteImport.update({
+  id: '/vocabulary/',
+  path: '/vocabulary/',
   getParentRoute: () => ManageRoute,
 } as any)
-const ManageDataRoute = ManageDataRouteImport.update({
-  id: '/data',
-  path: '/data',
+const ManageSettingsIndexRoute = ManageSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => ManageRoute,
 } as any)
-const ManageCoursesRoute = ManageCoursesRouteImport.update({
-  id: '/courses',
-  path: '/courses',
+const ManagePapersIndexRoute = ManagePapersIndexRouteImport.update({
+  id: '/papers/',
+  path: '/papers/',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageDataIndexRoute = ManageDataIndexRouteImport.update({
+  id: '/data/',
+  path: '/data/',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageCoursesIndexRoute = ManageCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
   getParentRoute: () => ManageRoute,
 } as any)
 const ManagePaperDetailIdRoute = ManagePaperDetailIdRouteImport.update({
@@ -71,75 +83,87 @@ const ManagePaperDetailIdRoute = ManagePaperDetailIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/courses': typeof ManageCoursesRoute
-  '/data': typeof ManageDataRoute
-  '/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
   '/paper-detail/$id': typeof ManagePaperDetailIdRoute
+  '/courses': typeof ManageCoursesIndexRoute
+  '/data': typeof ManageDataIndexRoute
+  '/papers': typeof ManagePapersIndexRoute
+  '/settings': typeof ManageSettingsIndexRoute
+  '/vocabulary': typeof ManageVocabularyIndexRoute
 }
 export interface FileRoutesByTo {
-  '/courses': typeof ManageCoursesRoute
-  '/data': typeof ManageDataRoute
-  '/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/': typeof ManageIndexRoute
   '/paper-detail/$id': typeof ManagePaperDetailIdRoute
+  '/courses': typeof ManageCoursesIndexRoute
+  '/data': typeof ManageDataIndexRoute
+  '/papers': typeof ManagePapersIndexRoute
+  '/settings': typeof ManageSettingsIndexRoute
+  '/vocabulary': typeof ManageVocabularyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_manage': typeof ManageRouteWithChildren
-  '/_manage/courses': typeof ManageCoursesRoute
-  '/_manage/data': typeof ManageDataRoute
-  '/_manage/settings': typeof ManageSettingsRoute
   '/answer/$id': typeof AnswerIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/sentence-copy/$id': typeof SentenceCopyIdRoute
   '/_manage/': typeof ManageIndexRoute
   '/_manage/paper-detail/$id': typeof ManagePaperDetailIdRoute
+  '/_manage/courses/': typeof ManageCoursesIndexRoute
+  '/_manage/data/': typeof ManageDataIndexRoute
+  '/_manage/papers/': typeof ManagePapersIndexRoute
+  '/_manage/settings/': typeof ManageSettingsIndexRoute
+  '/_manage/vocabulary/': typeof ManageVocabularyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/courses'
-    | '/data'
-    | '/settings'
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/sentence-copy/$id'
     | '/'
     | '/paper-detail/$id'
+    | '/courses'
+    | '/data'
+    | '/papers'
+    | '/settings'
+    | '/vocabulary'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/courses'
-    | '/data'
-    | '/settings'
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/sentence-copy/$id'
     | '/'
     | '/paper-detail/$id'
+    | '/courses'
+    | '/data'
+    | '/papers'
+    | '/settings'
+    | '/vocabulary'
   id:
     | '__root__'
     | '/_manage'
-    | '/_manage/courses'
-    | '/_manage/data'
-    | '/_manage/settings'
     | '/answer/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/sentence-copy/$id'
     | '/_manage/'
     | '/_manage/paper-detail/$id'
+    | '/_manage/courses/'
+    | '/_manage/data/'
+    | '/_manage/papers/'
+    | '/_manage/settings/'
+    | '/_manage/vocabulary/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,25 +218,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnswerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_manage/settings': {
-      id: '/_manage/settings'
+    '/_manage/vocabulary/': {
+      id: '/_manage/vocabulary/'
+      path: '/vocabulary'
+      fullPath: '/vocabulary'
+      preLoaderRoute: typeof ManageVocabularyIndexRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/_manage/settings/': {
+      id: '/_manage/settings/'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof ManageSettingsRouteImport
+      preLoaderRoute: typeof ManageSettingsIndexRouteImport
       parentRoute: typeof ManageRoute
     }
-    '/_manage/data': {
-      id: '/_manage/data'
+    '/_manage/papers/': {
+      id: '/_manage/papers/'
+      path: '/papers'
+      fullPath: '/papers'
+      preLoaderRoute: typeof ManagePapersIndexRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/_manage/data/': {
+      id: '/_manage/data/'
       path: '/data'
       fullPath: '/data'
-      preLoaderRoute: typeof ManageDataRouteImport
+      preLoaderRoute: typeof ManageDataIndexRouteImport
       parentRoute: typeof ManageRoute
     }
-    '/_manage/courses': {
-      id: '/_manage/courses'
+    '/_manage/courses/': {
+      id: '/_manage/courses/'
       path: '/courses'
       fullPath: '/courses'
-      preLoaderRoute: typeof ManageCoursesRouteImport
+      preLoaderRoute: typeof ManageCoursesIndexRouteImport
       parentRoute: typeof ManageRoute
     }
     '/_manage/paper-detail/$id': {
@@ -226,19 +264,23 @@ declare module '@tanstack/react-router' {
 }
 
 interface ManageRouteChildren {
-  ManageCoursesRoute: typeof ManageCoursesRoute
-  ManageDataRoute: typeof ManageDataRoute
-  ManageSettingsRoute: typeof ManageSettingsRoute
   ManageIndexRoute: typeof ManageIndexRoute
   ManagePaperDetailIdRoute: typeof ManagePaperDetailIdRoute
+  ManageCoursesIndexRoute: typeof ManageCoursesIndexRoute
+  ManageDataIndexRoute: typeof ManageDataIndexRoute
+  ManagePapersIndexRoute: typeof ManagePapersIndexRoute
+  ManageSettingsIndexRoute: typeof ManageSettingsIndexRoute
+  ManageVocabularyIndexRoute: typeof ManageVocabularyIndexRoute
 }
 
 const ManageRouteChildren: ManageRouteChildren = {
-  ManageCoursesRoute: ManageCoursesRoute,
-  ManageDataRoute: ManageDataRoute,
-  ManageSettingsRoute: ManageSettingsRoute,
   ManageIndexRoute: ManageIndexRoute,
   ManagePaperDetailIdRoute: ManagePaperDetailIdRoute,
+  ManageCoursesIndexRoute: ManageCoursesIndexRoute,
+  ManageDataIndexRoute: ManageDataIndexRoute,
+  ManagePapersIndexRoute: ManagePapersIndexRoute,
+  ManageSettingsIndexRoute: ManageSettingsIndexRoute,
+  ManageVocabularyIndexRoute: ManageVocabularyIndexRoute,
 }
 
 const ManageRouteWithChildren =

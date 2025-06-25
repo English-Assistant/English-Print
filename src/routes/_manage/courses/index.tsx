@@ -25,7 +25,7 @@ import { useState } from 'react';
 import NewCourseModal from './-NewCourseModal';
 import dayjs from 'dayjs';
 
-export const Route = createFileRoute('/_manage/courses')({
+export const Route = createFileRoute('/_manage/courses/')({
   component: CoursesPage,
 });
 

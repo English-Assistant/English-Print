@@ -8,7 +8,7 @@ import {
 import { entries, set, clear } from 'idb-keyval';
 import merge from 'lodash-es/merge';
 
-export const Route = createFileRoute('/_manage/data')({
+export const Route = createFileRoute('/_manage/data/')({
   component: DataManagement,
 });
 

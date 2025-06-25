@@ -3,7 +3,7 @@ import { Form, Input, Button, Card, App, Typography } from 'antd';
 import { useSettingsStore } from '@/stores/settings';
 import { useEffect } from 'react';
 
-export const Route = createFileRoute('/_manage/settings')({
+export const Route = createFileRoute('/_manage/settings/')({
   component: SettingsPage,
 });
 
@@ -41,15 +41,16 @@ function SettingsPage() {
             { required: true, message: '请输入 API URL' },
             { type: 'url', message: '请输入有效的 URL' },
           ]}
-          tooltip="Dify Workflow 的 API 地址，例如：https://api.dify.ai/v1/workflows/run"
+          tooltip="Dify Workflow 的 API http://dify.xiaowo.live/v1"
         >
-          <Input placeholder="https://api.dify.ai/v1/workflows/run" />
+          <Input placeholder="http://dify.xiaowo.live/v1" />
         </Form.Item>
         <Form.Item
           name="apiToken"
           label="API 密钥 (Token)"
           rules={[{ required: true, message: '请输入 API 密钥' }]}
           tooltip="Dify API 的 Bearer Token"
+          help="请直接粘贴密钥，不要包含 'Bearer ' 前缀。"
         >
           <Input.Password placeholder="请输入 API 密钥" />
         </Form.Item>

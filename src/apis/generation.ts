@@ -37,9 +37,10 @@ export const runDifyWorkflow = async (inputs: Inputs) => {
 
   try {
     const response = await axios.post<ApiBatchNewPaperResponse | ErrorResponse>(
-      apiUrl,
+      `/workflows/run`,
       body,
       {
+        baseURL: apiUrl,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiToken}`,
