@@ -25,6 +25,7 @@ export interface Section {
 export interface Part {
   partNumber: string;
   instructions?: string;
+  passage?: string;
   content: Question[];
 }
 
@@ -48,7 +49,8 @@ export type QuestionData =
   | MultiSelectChoiceData
   | TrueFalseData
   | FillInBlankData
-  | OpenEndedData;
+  | OpenEndedData
+  | GuidedWritingData;
 
 // 选择题的数据结构
 export interface MultiSelectChoiceData {
@@ -77,4 +79,12 @@ export interface FillInBlankData {
 export interface OpenEndedData {
   id: string;
   text: string;
+}
+
+/**
+ * 造句题的数据结构 (V2.2)
+ */
+export interface GuidedWritingData {
+  id: string;
+  words: string[]; // 词组，供学生组成句子
 }

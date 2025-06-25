@@ -4,38 +4,79 @@
   "description": "一个使用条件式校验 (if-then) 彻底解决 oneOf 冲突的、与前端类型定义完全对齐的最终版 Schema。",
   "type": "object",
   "properties": {
-    "title": { "type": "string" },
-    "sections": { "type": "array", "items": { "$ref": "#/$defs/section" } }
+    "title": {
+      "type": "string"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/section"
+      }
+    }
   },
-  "required": ["title", "sections"],
+  "required": [
+    "title",
+    "sections"
+  ],
   "$defs": {
     "section": {
       "type": "object",
       "properties": {
-        "sectionNumber": { "type": "string" },
-        "title": { "type": "string" },
-        "points": { "type": "number" },
-        "instructions": { "type": "string" },
-        "parts": { "type": "array", "items": { "$ref": "#/$defs/part" } }
+        "sectionNumber": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "points": {
+          "type": "number"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/part"
+          }
+        }
       },
-      "required": ["sectionNumber", "title", "parts"]
+      "required": [
+        "sectionNumber",
+        "title",
+        "parts"
+      ]
     },
     "part": {
       "type": "object",
       "properties": {
-        "partNumber": { "type": "string" },
-        "instructions": { "type": "string" },
+        "partNumber": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "string"
+        },
+        "passage": {
+          "type": "string",
+          "description": "用于阅读理解或情景对话的短文"
+        },
         "content": {
           "type": "array",
-          "items": { "$ref": "#/$defs/question" }
+          "items": {
+            "$ref": "#/$defs/question"
+          }
         }
       },
-      "required": ["content"]
+      "required": [
+        "content"
+      ]
     },
     "question": {
       "type": "object",
       "properties": {
-        "type": { "const": "QUESTION" },
+        "type": {
+          "const": "QUESTION"
+        },
         "questionType": {
           "type": "string",
           "enum": [
@@ -46,51 +87,93 @@
             "GUIDED_WRITING"
           ]
         },
-        "data": { "type": "object" }
+        "data": {
+          "type": "object"
+        }
       },
-      "required": ["type", "questionType", "data"],
+      "required": [
+        "type",
+        "questionType",
+        "data"
+      ],
       "allOf": [
         {
           "if": {
             "properties": {
-              "questionType": { "const": "MULTI_SELECT_CHOICE" }
+              "questionType": {
+                "const": "MULTI_SELECT_CHOICE"
+              }
             }
           },
           "then": {
             "properties": {
-              "data": { "$ref": "#/$defs/questionData/multiSelectChoice" }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": { "questionType": { "const": "TRUE_FALSE" } }
-          },
-          "then": {
-            "properties": {
-              "data": { "$ref": "#/$defs/questionData/trueFalse" }
-            }
-          }
-        },
-        {
-          "if": {
-            "properties": { "questionType": { "const": "FILL_IN_BLANK" } }
-          },
-          "then": {
-            "properties": {
-              "data": { "$ref": "#/$defs/questionData/fillInBlank" }
+              "data": {
+                "$ref": "#/$defs/questionData/multiSelectChoice"
+              }
             }
           }
         },
         {
           "if": {
             "properties": {
-              "questionType": { "enum": ["OPEN_ENDED", "GUIDED_WRITING"] }
+              "questionType": {
+                "const": "TRUE_FALSE"
+              }
             }
           },
           "then": {
             "properties": {
-              "data": { "$ref": "#/$defs/questionData/openEnded" }
+              "data": {
+                "$ref": "#/$defs/questionData/trueFalse"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "FILL_IN_BLANK"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/fillInBlank"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "OPEN_ENDED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/openEnded"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "GUIDED_WRITING"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/guidedWriting"
+              }
             }
           }
         }
@@ -100,41 +183,102 @@
       "multiSelectChoice": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "questionText": { "type": "string" },
-          "options": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "An array of strings for the options. IMPORTANT: Each string must be pure option text, WITHOUT any prefixes like 'A.', 'B.', etc."
+          }
         },
-        "required": ["id", "questionText", "options"]
+        "required": [
+          "id",
+          "questionText",
+          "options"
+        ]
       },
       "trueFalse": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "questionText": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          }
         },
-        "required": ["id", "questionText"]
+        "required": [
+          "id",
+          "questionText"
+        ]
       },
       "fillInBlank": {
         "type": "object",
         "description": "单词拼写题的结构化数据",
         "properties": {
-          "id": { "type": "string" },
-          "number": { "type": "string", "description": "题号，例如 '1.'" },
-          "hint": { "type": "string", "description": "中文提示，例如 '春天'" },
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string",
+            "description": "题号，例如 '1.'"
+          },
+          "hint": {
+            "type": "string",
+            "description": "中文提示，例如 '春天'"
+          },
           "stem": {
             "type": "string",
             "description": "单词的词干或首字母，例如 's'"
           }
         },
-        "required": ["id", "number", "hint", "stem"]
+        "required": [
+          "id",
+          "number",
+          "hint",
+          "stem"
+        ]
       },
       "openEnded": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "text": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
         },
-        "required": ["id", "text"]
+        "required": [
+          "id",
+          "text"
+        ]
+      },
+      "guidedWriting": {
+        "type": "object",
+        "description": "造句题的数据结构",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "提供给学生用于造句的单词或词组列表"
+          }
+        },
+        "required": [
+          "id",
+          "words"
+        ]
       }
     }
   }

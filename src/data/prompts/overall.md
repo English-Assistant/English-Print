@@ -167,7 +167,7 @@
 
 ## 💬 信心鼓励（Encouragement）
 
-> “【鼓励语句，例如：每句话你说出口，都是向前的一步】”
+> "【鼓励语句，例如：每句话你说出口，都是向前的一步】"
 
 ✅ 不怕说错，只怕不开口。你能行！
 ```
@@ -198,21 +198,29 @@
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-
-  "title": "Unit Schema",
-
+  "title": "Unit Schema for Copy Exercise",
   "type": "object",
-
   "properties": {
-    "title": { "type": "string" },
-
-    "word_copy": { "type": "array", "items": { "type": "string" } },
-
-    "sentence_copy": { "type": "array", "items": { "type": "string" } },
-
-    "sentence_transform": { "type": "array", "items": { "type": "string" } }
+    "title": {
+      "type": "string",
+      "description": "The title of the unit, must match the user's input."
+    },
+    "word_copy": {
+      "type": "array",
+      "description": "A list of core vocabulary words for copy practice.",
+      "items": { "type": "string" }
+    },
+    "sentence_copy": {
+      "type": "array",
+      "description": "A list of key sentences for copy practice, max 5 items.",
+      "items": { "type": "string" }
+    },
+    "sentence_transform": {
+      "type": "array",
+      "description": "A list of transformed sentences for copy practice, max 5 items.",
+      "items": { "type": "string" }
+    }
   },
-
   "required": ["title", "word_copy", "sentence_copy", "sentence_transform"]
 }
 ```
@@ -278,6 +286,10 @@
         "properties": {
           "partNumber": { "type": "string" },
           "instructions": { "type": "string" },
+          "passage": {
+            "type": "string",
+            "description": "用于阅读理解或情景对话的短文"
+          },
           "content": {
             "type": "array",
             "items": { "$ref": "#/$defs/question" }
@@ -338,12 +350,24 @@
           {
             "if": {
               "properties": {
-                "questionType": { "enum": ["OPEN_ENDED", "GUIDED_WRITING"] }
+                "questionType": { "const": "OPEN_ENDED" }
               }
             },
             "then": {
               "properties": {
                 "data": { "$ref": "#/$defs/questionData/openEnded" }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "questionType": { "const": "GUIDED_WRITING" }
+              }
+            },
+            "then": {
+              "properties": {
+                "data": { "$ref": "#/$defs/questionData/guidedWriting" }
               }
             }
           }
@@ -391,6 +415,19 @@
             "text": { "type": "string" }
           },
           "required": ["id", "text"]
+        },
+        "guidedWriting": {
+          "type": "object",
+          "description": "造句题的数据结构",
+          "properties": {
+            "id": { "type": "string" },
+            "words": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "提供给学生用于造句的单词或词组列表"
+            }
+          },
+          "required": ["id", "words"]
         }
       }
     }

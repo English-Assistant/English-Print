@@ -26,22 +26,26 @@
       "description": "A JSON object for copy exercises, including title, words to copy, and sentences to copy/transform.",
       "properties": {
         "title": {
-          "type": "string"
+          "type": "string",
+          "description": "The title of the unit."
         },
         "word_copy": {
           "type": "array",
+          "description": "A list of core vocabulary words for copy practice.",
           "items": {
             "type": "string"
           }
         },
         "sentence_copy": {
           "type": "array",
+          "description": "A list of key sentences for copy practice, max 5 items.",
           "items": {
             "type": "string"
           }
         },
         "sentence_transform": {
           "type": "array",
+          "description": "A list of transformed sentences for copy practice, max 5 items.",
           "items": {
             "type": "string"
           }
@@ -148,6 +152,10 @@
         },
         "instructions": {
           "type": "string"
+        },
+        "passage": {
+          "type": "string",
+          "description": "The passage for reading comprehension or dialogue context."
         },
         "content": {
           "type": "array",

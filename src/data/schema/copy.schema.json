@@ -1,29 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Unit Schema",
+  "title": "Unit Schema for Copy Exercise",
   "type": "object",
   "properties": {
     "title": {
       "type": "string",
-      "description": "单元标题"
+      "description": "The title of the unit, must match the user's input."
     },
     "word_copy": {
       "type": "array",
-      "description": "需要抄写的单词列表",
+      "description": "A list of core vocabulary words for copy practice.",
       "items": {
         "type": "string"
       }
     },
     "sentence_copy": {
       "type": "array",
-      "description": "需要抄写的句子列表",
+      "description": "A list of key sentences for copy practice, max 5 items.",
       "items": {
         "type": "string"
       }
     },
     "sentence_transform": {
       "type": "array",
-      "description": "根据句子结构来变形来的句子列表，考虑句子的知识点，但是换一种形式来练习",
+      "description": "A list of transformed sentences for copy practice, max 5 items.",
       "items": {
         "type": "string"
       }

@@ -134,28 +134,36 @@
   - 生成一个JSON对象，严格符合提供的 `Unit Schema` 格式。
   - `word_copy` 必须包含所有核心单词。
   - `title` 字段必须严格等于本节内容的 `单元标题`。
-  - `sentence_copy` 包含核心句型。
-  - `sentence_transform` 应基于核心句型进行**成人学习者需要的实用变换**，如陈述句转为一般疑问句、否定句，或进行人称替换。
+  - `sentence_copy` 包含核心句型，**最多5句**。
+  - `sentence_transform` 应基于核心句型进行实用变换，**最多5句**。
 - **格式**: 生成一个JSON对象，它将作为最终输出的JSON对象中 `copyExercise` 键的值。请严格遵循下面提供的 Schema 来构建这个JSON对象。
 
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-
-  "title": "Unit Schema",
-
+  "title": "Unit Schema for Copy Exercise",
   "type": "object",
-
   "properties": {
-    "title": { "type": "string" },
-
-    "word_copy": { "type": "array", "items": { "type": "string" } },
-
-    "sentence_copy": { "type": "array", "items": { "type": "string" } },
-
-    "sentence_transform": { "type": "array", "items": { "type": "string" } }
+    "title": {
+      "type": "string",
+      "description": "The title of the unit, must match the user's input."
+    },
+    "word_copy": {
+      "type": "array",
+      "description": "A list of core vocabulary words for copy practice.",
+      "items": { "type": "string" }
+    },
+    "sentence_copy": {
+      "type": "array",
+      "description": "A list of key sentences for copy practice, max 5 items.",
+      "items": { "type": "string" }
+    },
+    "sentence_transform": {
+      "type": "array",
+      "description": "A list of transformed sentences for copy practice, max 5 items.",
+      "items": { "type": "string" }
+    }
   },
-
   "required": ["title", "word_copy", "sentence_copy", "sentence_transform"]
 }
 ```
@@ -164,34 +172,33 @@
 
 - **核心要求**:
 
-* **【标题规则】**: `examPaper` 的 `title` 字段必须严格等于本节内容的 `单元标题`。
-* **【头号规则，绝对强制】**: 所有提供给学生阅读的 `title` 和 `instructions` 字段，都 **必须** 严格遵循 **"中文标题 (English Title)"** 或 **"中文说明 (English Instruction)"** 的格式。这是最高优先级的指令。
+* **【头号规则，绝对强制】**:
+  - `section` 的 `title` 字段**必须**同时包含中文和英文，并严格采用 **"中文标题 (English Title)"** 的格式。例如："听力理解 (Listening Comprehension)"。这是一个硬性要求，不能只有英文或只有中文。
+  - `instructions` 字段是**可选的**。只有在有必要提供额外说明时才使用。如果使用，格式也必须是 "中文说明 (English Instruction)"。
+  - **【绝对禁止】** 如果没有额外说明，**必须省略 `instructions` 字段**。严禁将标题内容复制到 `instructions` 或输出占位符。
 * 生成一个包含 **40-50道题** 的JSON对象，严格符合下方提供的 `EnglishExamSheet` Schema。
 * **【！！！最重要结构指令！！！】**: 为了保证结构的一致性，每一个大题 (`section`) 内部，**应尽可能只使用一个 `part` 对象**。该 `part` 对象中的 `content` 数组应包含此大题下的所有题目。只有当一个大题内部有完全不同的题目类型和说明时，才允许使用多个`part`。
 * **【强制指令】**: 每一个大题 (`section`) 内部的题目，其题干（即`questionText`或`text`字段）**必须以 '序号. ' 开头** (例如: "1. ", "2. ", "3. ")。请确保**所有题型**（包括选择题、判断题、改错题、造句题等）都严格遵循此规则。
 * **序号重置规则**: 每一个大题 (`section`) 内部的题目序号，都必须从 **1** 开始重新计数。
 
-- **题型结构规划 (已更新为9个部分)**:
+- **题型结构规划 (V2.2 - 支持阅读短文和结构化造句)**:
+
+**【！！！针对选择题选项的绝对强制指令！！！】**:
+
+- `MULTI_SELECT_CHOICE` 题型的 `options` 数组，其每个元素都**必须是纯净的、不带任何前缀的文本**。
+- **【绝对禁止】** 在选项字符串中包含 "A.", "B.", "C.", "A) " 等任何选项标识符。AI在生成时必须确保移除了这些前缀。
+- **正确示例**: `options: ["spring", "summer", "autumn"]`
+- **错误示例**: `options: ["A. spring", "B. summer", "C. autumn"]`
 
 1. **I. 听力理解 (Listening Comprehension)**: 约10题, `MULTI_SELECT_CHOICE`.
 2. **II. 单词拼写 (Word Spelling)**: 约6题, `FILL_IN_BLANK`.
-   - **【！！！最重要结构指令！！！】**: 对于此题型，`data` 对象必须严格遵守以下规则：
-     - `"number"`: 字符串类型，表示题号，如 `"1."`.
-     - `"hint"`: 字符串类型，表示中文提示，如 `"春天"`.
-     - `"stem"`: 字符串类型，**严格要求只包含单词的首字母，不能包含任何其他字符。**
-   - **【！！！反面教材！！！】**: **严禁在`stem`字段中包含任何下划线 `_` 或其他占位符。**
-     - **正确示例 (Correct Example):** `{"stem": "s"}`
-     - **错误示例 (Incorrect Example):** `{"stem": "s _ _ _ _ _"}` 或 `{"stem": "s____g"}`
-3. **III. 判断题 (True/False)**: **约5题, `TRUE_FALSE`.题干为一个陈述句，要求学生判断正误。**
+3. **III. 判断题 (True/False)**: 约5题, `TRUE_FALSE`.
 4. **IV. 词汇选择 (Vocabulary Choice)**: 约5题, `MULTI_SELECT_CHOICE`.
-   - **【！！！绝对强制的选项指令！！！】**: 对于所有`MULTI_SELECT_CHOICE`题型，其`options`数组中的每个字符串 **绝对禁止包含** 任何'A.'、'B.'、'C.'或'A) '等题号/选项前缀。选项必须是 **纯净的、不带任何前缀的文本**。同时，每个选择题必须提供**至少3个，通常为4个**选项。AI在生成时必须自行移除这些前缀。
-     - **正确示例 (Correct Example):** `["My favorite season is spring.", "My favorite season spring."]`
-     - **错误示例 (Incorrect Example):** `["A. My favorite season is spring.", "B. My favorite season spring."]`
 5. **V. 语法选择 (Grammar Choice)**: 约5题, `MULTI_SELECT_CHOICE`.
-6. **VI. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`.
-7. **VII. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`.
+6. **VI. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`. **指令**: 在 `part` 中提供一段 `passage` 作为对话上下文，然后基于此对话出题。
+7. **VII. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`. **指令**: 在 `part` 中提供一段 `passage` 作为阅读短文，然后基于此短文出题。
 8. **VIII. 句子改错 (Error Correction)**: 约6题, `OPEN_ENDED`.
-9. **IX. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`.
+9. **IX. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`. **指令**: 在题目的 `data.words` 数组中提供打乱顺序的单词或词组。
 
 - **格式**: 生成一个JSON对象，它将作为最终输出的JSON对象中 `examPaper` 键的值。请严格遵循下面提供的 Schema 来构建这个JSON对象。
 
@@ -211,7 +218,11 @@
       "type": "object",
       "properties": {
         "sectionNumber": { "type": "string" },
-        "title": { "type": "string" },
+        "title": {
+          "type": "string",
+          "description": "The title of the section. MUST follow the format '中文标题 (English Title)'.",
+          "pattern": "^[\\u4e00-\\u9fa5\\s]+\\(.*\\)$"
+        },
         "points": { "type": "number" },
         "instructions": { "type": "string" },
         "parts": { "type": "array", "items": { "$ref": "#/$defs/part" } }
@@ -223,6 +234,10 @@
       "properties": {
         "partNumber": { "type": "string" },
         "instructions": { "type": "string" },
+        "passage": {
+          "type": "string",
+          "description": "用于阅读理解或情景对话的短文"
+        },
         "content": {
           "type": "array",
           "items": { "$ref": "#/$defs/question" }
@@ -283,12 +298,24 @@
         {
           "if": {
             "properties": {
-              "questionType": { "enum": ["OPEN_ENDED", "GUIDED_WRITING"] }
+              "questionType": { "const": "OPEN_ENDED" }
             }
           },
           "then": {
             "properties": {
               "data": { "$ref": "#/$defs/questionData/openEnded" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": { "const": "GUIDED_WRITING" }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": { "$ref": "#/$defs/questionData/guidedWriting" }
             }
           }
         }
@@ -300,7 +327,11 @@
         "properties": {
           "id": { "type": "string" },
           "questionText": { "type": "string" },
-          "options": { "type": "array", "items": { "type": "string" } }
+          "options": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "An array of strings for the options. IMPORTANT: Each string must be pure option text, WITHOUT any prefixes like 'A.', 'B.', etc."
+          }
         },
         "required": ["id", "questionText", "options"]
       },
@@ -336,15 +367,24 @@
           "text": { "type": "string" }
         },
         "required": ["id", "text"]
+      },
+      "guidedWriting": {
+        "type": "object",
+        "description": "造句题的数据结构",
+        "properties": {
+          "id": { "type": "string" },
+          "words": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "提供给学生用于造句的单词或词组列表"
+          }
+        },
+        "required": ["id", "words"]
       }
     }
   }
 }
 ```
-
-+**【！！！针对选择题的最后一条强制指令！！！】** +在生成 `MULTI_SELECT_CHOICE` 题型时，其 `data.questionText` 字段 **必须是纯净的题干本身**，绝对禁止在该字段中包含任何换行符 `\n` 以及 'A)'、'B)'、'C)' 等选项标识或选项的文本内容。所有选项的文本 **只能** 出现在 `data.options` 数组中。
-
-- +_ **正确示例**: `"questionText": "1. What's the weather like in spring?"` +_ **错误示例**: `"questionText": "1. What's the weather like in spring?\nA) Hot\nB) Warm\nC) Cold"`
 
 ### **第五部分：`examAnswers` (JSON Object)**
 

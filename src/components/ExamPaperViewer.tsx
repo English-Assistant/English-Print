@@ -10,6 +10,7 @@ import type {
   TrueFalseData,
   FillInBlankData,
   OpenEndedData,
+  GuidedWritingData,
 } from '@/data/types/exam';
 
 export interface ExamPaperViewerProps {
@@ -90,6 +91,11 @@ function PartView({
           {part.instructions}
         </p>
       )}
+      {part.passage && (
+        <div className="mb-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 text-gray-800 leading-relaxed">
+          <p style={{ whiteSpace: 'pre-wrap' }}>{part.passage}</p>
+        </div>
+      )}
       <div className="flex flex-col gap-5 pl-4">
         {part.content.map((question) => (
           <QuestionView key={question.data.id} question={question} />
@@ -116,7 +122,9 @@ function QuestionView({ question }: { question: Question }) {
             <p className="flex-grow">{choiceData.questionText}</p>
             {/* === 打印时显示的、供手写的版本 === */}
             <div className="hidden print:block pl-4">
-              <span className="font-semibold text-lg">(      )</span>
+              <span className="font-semibold text-lg text-gray-400">
+                (      )
+              </span>
             </div>
           </div>
 
@@ -178,7 +186,9 @@ function QuestionView({ question }: { question: Question }) {
 
             {/* === 打印时显示的、供手写的版本 === */}
             <div className="hidden print:block">
-              <span className="font-semibold text-lg">(      )</span>
+              <span className="font-semibold text-lg text-gray-400">
+                (      )
+              </span>
             </div>
           </div>
         </div>
@@ -192,25 +202,35 @@ function QuestionView({ question }: { question: Question }) {
       return (
         <div className="flex items-end">
           <span>{promptPart}</span>
-          <span className="flex-1 border-b border-gray-600 ml-2 min-w-[150px]"></span>
+          <span className="flex-1 border-b border-gray-400 ml-2 min-w-[150px]"></span>
         </div>
       );
     }
 
-    case 'OPEN_ENDED':
-    case 'GUIDED_WRITING': {
+    case 'OPEN_ENDED': {
       const openEndedData = data as OpenEndedData;
-      const lines = questionType === 'GUIDED_WRITING' ? 2 : 1;
       return (
         <div className="flex flex-col">
           <p className="mb-2">{openEndedData.text}</p>
           <div className="flex flex-col gap-5 mt-1">
-            {Array.from({ length: lines }).map((_, index) => (
-              <div
-                key={index}
-                className="w-full border-b border-gray-500 h-[1.5em]"
-              ></div>
-            ))}
+            <div className="w-full border-b border-gray-400 h-[1.5em]"></div>
+          </div>
+        </div>
+      );
+    }
+    case 'GUIDED_WRITING': {
+      const guidedWritingData = data as GuidedWritingData;
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className="font-medium text-gray-700">请用以下词语造句:</span>
+            <span className="text-blue-700 font-mono bg-blue-50 px-2 py-1 rounded">
+              {guidedWritingData.words.join(' | ')}
+            </span>
+          </div>
+          <div className="flex flex-col gap-5 mt-1">
+            <div className="w-full border-b border-gray-400 h-[1.5em]"></div>
+            <div className="w-full border-b border-gray-400 h-[1.5em]"></div>
           </div>
         </div>
       );
