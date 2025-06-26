@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
 import {
   Button,
   Card,
@@ -125,13 +125,14 @@ function PaperDetailPage() {
             >
               返回列表
             </Button>
-            <Button
-              type="primary"
-              icon={<PrinterOutlined />}
-              onClick={() => window.open(`/print/${paper.id}`, '_blank')}
-            >
-              合并打印
-            </Button>
+            <Space>
+              <Button onClick={() => setEditingKey(null)}>编辑章节</Button>
+              <Link to="/print/$id" params={{ id: paper.id }} target="_blank">
+                <Button type="primary" icon={<PrinterOutlined />}>
+                  合并打印
+                </Button>
+              </Link>
+            </Space>
           </Space>
           <Space>
             <Typography.Title level={4} style={{ margin: 0 }}>

@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import {
   Input,
   Button,
@@ -158,20 +158,24 @@ function PaperManagement() {
                   style={{ height: '100%' }}
                   actions={[
                     <Tooltip title="合并打印试卷、答案、导读等">
-                      <Button
-                        key="print"
-                        type="text"
-                        icon={<PrinterOutlined />}
-                        style={{
-                          width: '100%',
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(`/print/${paper.id}`, '_blank');
-                        }}
+                      <Link
+                        to="/print/$id"
+                        params={{ id: paper.id }}
+                        target="_blank"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ display: 'block', width: '100%' }}
                       >
-                        打印
-                      </Button>
+                        <Button
+                          key="print"
+                          type="text"
+                          icon={<PrinterOutlined />}
+                          style={{
+                            width: '100%',
+                          }}
+                        >
+                          打印
+                        </Button>
+                      </Link>
                     </Tooltip>,
                     <Tooltip title="基于标题、单词、句型生成试卷内容">
                       <Button

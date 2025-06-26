@@ -37,7 +37,10 @@ export const useGenerationTaskStore = create(
     (set, get) => ({
       tasks: [],
       getTaskByPaperId: (paperId) => {
-        return get().tasks.find((t) => t.paperId === paperId);
+        const tasksForPaper = get().tasks.filter((t) => t.paperId === paperId);
+        if (tasksForPaper.length === 0) return undefined;
+        // 返回最新的任务
+        return tasksForPaper.sort((a, b) => b.startTime - a.startTime)[0];
       },
       clearTask: (paperId) => {
         set((state) => ({
@@ -81,7 +84,14 @@ export const useGenerationTaskStore = create(
         await get().startGeneration(paper);
       },
       startGeneration: async (paper) => {
-        const taskId = paper.id + '-' + Date.now();
+        // 通过getTaskByPaperId获取最新的task
+        const latestTask = get().getTaskByPaperId(paper.id);
+        // 如果最新的任务正在运行中，则不执行任何操作
+        if (latestTask && latestTask.status === 'processing') {
+          return;
+        }
+
+        const taskId = `${paper.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
         const newTask: GenerationTask = {
           id: taskId,
           paperId: paper.id,
