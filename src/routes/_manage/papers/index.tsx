@@ -14,6 +14,7 @@ import {
   Empty,
   Select,
   App,
+  Popover,
 } from 'antd';
 import {
   PlusOutlined,
@@ -143,6 +144,13 @@ function PaperManagement() {
           {filtered.map((paper) => {
             const task = getTaskByPaperId(paper.id);
             const isGenerating = task?.status === 'processing';
+            const isGenerated =
+              paper.examJson ||
+              paper.answerJson ||
+              paper.copyJson ||
+              paper.listeningJson ||
+              paper.preclass;
+
             return (
               <Col key={paper.id} xs={24} sm={12} lg={8}>
                 <Card
@@ -172,8 +180,6 @@ function PaperManagement() {
                         icon={<SyncOutlined spin={isGenerating} />}
                         style={{
                           width: '100%',
-                          color: token.colorWarning,
-                          fontWeight: 500,
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -181,7 +187,11 @@ function PaperManagement() {
                         }}
                         disabled={isGenerating || !apiUrl || !apiToken}
                       >
-                        {isGenerating ? '生成中' : '生成'}
+                        {isGenerating
+                          ? '生成中'
+                          : isGenerated
+                            ? '重新生成'
+                            : '生成'}
                       </Button>
                     </Tooltip>,
                     <Button
@@ -248,12 +258,36 @@ function PaperManagement() {
                     </Typography.Title>
 
                     <Space direction="vertical" size="small">
-                      {paper.courseId && (
-                        <Tag color="blue">
-                          {courses.find((c) => c.id === paper.courseId)
-                            ?.title || '未知课程'}
-                        </Tag>
-                      )}
+                      <Space>
+                        {paper.courseId && (
+                          <Tag color="blue">
+                            {courses.find((c) => c.id === paper.courseId)
+                              ?.title || '未知课程'}
+                          </Tag>
+                        )}
+                        {isGenerated && !task && (
+                          <Tag color="green">已生成</Tag>
+                        )}
+                        {task?.status === 'error' && (
+                          <Popover
+                            title="失败原因"
+                            trigger="hover"
+                            content={
+                              <div
+                                style={{
+                                  maxHeight: 200,
+                                  overflowY: 'auto',
+                                  maxWidth: 400,
+                                }}
+                              >
+                                {task.error}
+                              </div>
+                            }
+                          >
+                            <Tag color="red">生成失败</Tag>
+                          </Popover>
+                        )}
+                      </Space>
                       <Space
                         size={4}
                         style={{
