@@ -32,25 +32,38 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id: string) {
             if (id.includes('node_modules')) {
+              // 核心框架
               if (id.includes('react') || id.includes('react-dom')) {
                 return 'vendor-react';
               }
+              // UI 库
               if (id.includes('antd') || id.includes('@ant-design')) {
                 return 'vendor-antd';
               }
-              if (id.includes('@tanstack/react-router')) {
-                return 'vendor-router';
+              // 路由
+              if (id.includes('@tanstack')) {
+                return 'vendor-tanstack';
               }
-              if (id.includes('vanilla-jsoneditor') || id.includes('ajv')) {
-                return 'vendor-editor';
+              // 数据状态管理
+              if (
+                id.includes('zustand') ||
+                id.includes('dexie') ||
+                id.includes('axios') ||
+                id.includes('ahooks')
+              ) {
+                return 'vendor-data';
               }
-              if (id.includes('dexie') || id.includes('zustand')) {
-                return 'vendor-db';
+              // 编辑器、PDF、Markdown 等重功能模块
+              if (
+                id.includes('vanilla-jsoneditor') ||
+                id.includes('ajv') ||
+                id.includes('html2pdf.js') ||
+                id.includes('react-markdown')
+              ) {
+                return 'vendor-heavy';
               }
-              if (id.includes('react-markdown') || id.includes('remark')) {
-                return 'vendor-markdown';
-              }
-              return 'vendor-core';
+              // 其他第三方库
+              return 'vendor';
             }
           },
         },

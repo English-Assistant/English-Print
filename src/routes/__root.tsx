@@ -30,8 +30,8 @@ function GenerationNotifier() {
         (pt) => pt.paperId === task.paperId,
       );
 
-      // 检查状态变化：从 'generating' 变为 'success' 或 'error'
-      if (prevTask?.status === 'generating' && task.status !== 'generating') {
+      // 检查状态变化：从 'processing' 变为 'success' 或 'error'
+      if (prevTask?.status === 'processing' && task.status !== 'processing') {
         const key = `task-notification-${task.paperId}`;
         const btn = (
           <Button

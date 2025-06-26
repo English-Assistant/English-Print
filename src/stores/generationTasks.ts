@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { usePaperStore, useVocabularyStore } from '@/stores';
+import { usePaperStore } from './papers';
+import { useVocabularyStore } from './vocabulary';
 import { runDifyWorkflow } from '@/apis/generation';
 import { validateGeneratedPaperData } from '@/utils/schemaValidators';
 import type { Paper } from '@/data/types/paper';
