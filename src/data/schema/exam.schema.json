@@ -187,12 +187,17 @@
             "type": "string"
           },
           "questionText": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d+\\.\\s.*",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
           },
           "options": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "not": {
+                "pattern": "^[A-Z]\\.\\s.*"
+              }
             },
             "description": "An array of strings for the options. IMPORTANT: Each string must be pure option text, WITHOUT any prefixes like 'A.', 'B.', etc."
           }
@@ -210,7 +215,9 @@
             "type": "string"
           },
           "questionText": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d+\\.\\s.*",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
           }
         },
         "required": [
@@ -252,7 +259,9 @@
             "type": "string"
           },
           "text": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d+\\.\\s.*",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
           }
         },
         "required": [

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Listening Material Schema",
+  "type": "object",
+  "properties": {
+    "dialogues": {
+      "type": "array",
+      "description": "An array of 10 dialogue objects.",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the dialogue, e.g., 'dialogue_1'."
+          },
+          "number": {
+            "type": "integer",
+            "description": "The sequential number of the dialogue, e.g., 1, 2, 3."
+          },
+          "lines": {
+            "type": "array",
+            "description": "The sentences in the dialogue, between 2 and 4 lines.",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "character": {
+                  "type": "string",
+                  "description": "The name of the character speaking."
+                },
+                "sentence": {
+                  "type": "string",
+                  "description": "The sentence spoken by the character."
+                }
+              },
+              "required": [
+                "character",
+                "sentence"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "lines"
+        ]
+      }
+    }
+  },
+  "required": [
+    "dialogues"
+  ]
+}

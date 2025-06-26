@@ -3,6 +3,7 @@
 import type { ExamPaper } from './exam';
 import type { ExamAnswerSheet } from './answer';
 import type { CopyPracticeSheet } from './copy';
+import type { ListeningMaterial } from './listening';
 
 /**
  * @file
@@ -37,6 +38,9 @@ export interface Paper {
 
   /** [类型优化] 抄写练习的JSON数据 */
   copyJson?: CopyPracticeSheet;
+
+  /** [类型优化] 听力素材的JSON数据 */
+  listeningJson?: ListeningMaterial;
 
   /** [类型优化] 试卷内容的JSON数据 */
   examJson?: ExamPaper;

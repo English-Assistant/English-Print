@@ -10,7 +10,6 @@ import {
   Tag,
   Popconfirm,
   App,
-  Modal,
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -30,7 +29,7 @@ export const Route = createFileRoute('/_manage/paper-detail/$id')({
 
 type SectionKey =
   | 'preclass'
-  | 'listeningMaterial'
+  | 'listeningJson'
   | 'copyJson'
   | 'examJson'
   | 'answerJson';
@@ -42,7 +41,6 @@ function PaperDetailPage() {
   const params = Route.useParams();
   const paper = papers.find((p) => p.id === params.id);
   const [editingKey, setEditingKey] = useState<SectionKey | null>(null);
-  const [listeningPreviewVisible, setListeningPreviewVisible] = useState(false);
   const navigate = useNavigate();
   const { message } = App.useApp();
   if (!paper) {
@@ -91,9 +89,9 @@ function PaperDetailPage() {
       description: '句子抄写练习，帮助学生掌握句型结构',
     },
     {
-      key: 'listeningMaterial',
+      key: 'listeningJson',
       title: '听力素材',
-      viewPath: '', // 暂无预览
+      viewPath: '/listening/$id',
       description: '试卷配套的听力原文或补充材料',
     },
     {
@@ -149,7 +147,6 @@ function PaperDetailPage() {
       <Row gutter={[16, 16]}>
         {sectionConfigs.map((section) => {
           const hasData = Boolean(paper[section.key]);
-          const isListeningMaterial = section.key === 'listeningMaterial';
           return (
             <Col key={section.key} xs={24} sm={12}>
               <Card
@@ -180,14 +177,10 @@ function PaperDetailPage() {
                         type="text"
                         icon={<EyeOutlined />}
                         onClick={() => {
-                          if (isListeningMaterial) {
-                            setListeningPreviewVisible(true);
-                          } else {
-                            navigate({
-                              to: section.viewPath,
-                              params: { id: paper.id },
-                            });
-                          }
+                          navigate({
+                            to: section.viewPath,
+                            params: { id: paper.id },
+                          });
                         }}
                       >
                         预览
@@ -251,28 +244,6 @@ function PaperDetailPage() {
         sectionKey={editingKey}
         onClose={() => setEditingKey(null)}
       />
-
-      <Modal
-        title="听力素材"
-        open={listeningPreviewVisible}
-        onCancel={() => setListeningPreviewVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setListeningPreviewVisible(false)}>
-            关闭
-          </Button>,
-        ]}
-        forceRender={true}
-      >
-        <Typography.Paragraph
-          style={{
-            whiteSpace: 'pre-wrap',
-            maxHeight: '60vh',
-            overflowY: 'auto',
-          }}
-        >
-          {paper.listeningMaterial}
-        </Typography.Paragraph>
-      </Modal>
     </>
   );
 }

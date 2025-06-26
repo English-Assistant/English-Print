@@ -3,6 +3,7 @@ import draft7Meta from 'ajv/dist/refs/json-schema-draft-07.json';
 import examSchema from '@/data/schema/exam.schema.json';
 import answerSchema from '@/data/schema/answer.schema.json';
 import copySchema from '@/data/schema/copy.schema.json';
+import listeningSchema from '@/data/schema/listening.schema.json';
 import type { GeneratedPaperData } from '@/data/types/generation';
 
 const ajv = new Ajv2020();
@@ -12,6 +13,11 @@ ajv.addMetaSchema(draft7Meta);
  * 校验器 - 用于"抄写练习"的JSON数据
  */
 export const validateCopy = ajv.compile(copySchema as object);
+
+/**
+ * 校验器 - 用于"听力素材"的JSON数据
+ */
+export const validateListening = ajv.compile(listeningSchema as object);
 
 /**
  * 校验器 - 用于"试卷内容"的JSON数据

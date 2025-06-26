@@ -24,8 +24,8 @@ interface BatchNewPaperModalProps {
 interface FormValues {
   papers: {
     title: string;
-    coreWords?: string;
-    keySentences?: string;
+    coreWords: string;
+    story: string;
     courseId?: string;
     remark?: string;
   }[];
@@ -49,7 +49,7 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
         const newPaper: Omit<Paper, 'id' | 'updatedAt'> = {
           title: paperData.title,
           coreWords: paperData.coreWords,
-          keySentences: paperData.keySentences,
+          keySentences: paperData.story, // 将 story 映射到 keySentences
           courseId: paperData.courseId,
           remark: paperData.remark,
         };
@@ -133,7 +133,10 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
                         <Form.Item
                           {...restField}
                           name={[name, 'coreWords']}
-                          label="核心单词 (可选)"
+                          label="核心单词"
+                          rules={[
+                            { required: true, message: '请输入核心单词' },
+                          ]}
                         >
                           <Input.TextArea
                             rows={2}
@@ -142,14 +145,15 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          name={[name, 'keySentences']}
-                          label="重点句型 (可选)"
+                          name={[name, 'story']}
+                          label="本节小故事"
+                          rules={[
+                            { required: true, message: '请输入本节小故事' },
+                          ]}
                         >
                           <Input.TextArea
-                            rows={3}
-                            placeholder={
-                              "例如: What's your favorite season?\\nMy favorite season is..."
-                            }
+                            rows={4}
+                            placeholder="请输入一个小故事，AI将根据故事内容和核心单词生成教学材料。"
                           />
                         </Form.Item>
                         <Form.Item

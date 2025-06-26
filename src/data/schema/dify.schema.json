@@ -3,23 +3,65 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "The title of the unit, directly from user input."
+      "description": "The title of the unit, derived from the story."
     },
     "coreWords": {
       "type": "string",
       "description": "The core words for the unit, comma-separated."
     },
-    "keySentences": {
+    "story": {
       "type": "string",
-      "description": "The key sentences for the unit, separated by '==='."
+      "description": "The short story for the unit provided by the user."
     },
     "preClassGuide": {
       "type": "string",
       "description": "The pre-class guide in Markdown format. This string should contain all the sections like theme, learning goals, grammar focus, vocabulary, common mistakes, and encouragement."
     },
     "listeningMaterial": {
-      "type": "string",
-      "description": "The plain text for listening practice, containing about 10 short dialogues or statements."
+      "type": "object",
+      "description": "A JSON object for listening practice, containing dialogues.",
+      "properties": {
+        "dialogues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "number": {
+                "type": "integer"
+              },
+              "lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "character": {
+                      "type": "string"
+                    },
+                    "sentence": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "character",
+                    "sentence"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "number",
+              "lines"
+            ]
+          }
+        }
+      },
+      "required": [
+        "dialogues"
+      ]
     },
     "copyExercise": {
       "type": "object",
@@ -106,7 +148,7 @@
   "required": [
     "title",
     "coreWords",
-    "keySentences",
+    "story",
     "preClassGuide",
     "listeningMaterial",
     "copyExercise",

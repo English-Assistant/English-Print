@@ -15,6 +15,7 @@ import { Route as SentenceCopyIdRouteImport } from './routes/sentence-copy/$id'
 import { Route as PrintIdRouteImport } from './routes/print/$id'
 import { Route as PreclassGuideIdRouteImport } from './routes/preclass-guide/$id'
 import { Route as PaperIdRouteImport } from './routes/paper/$id'
+import { Route as ListeningIdRouteImport } from './routes/listening/$id'
 import { Route as AnswerIdRouteImport } from './routes/answer/$id'
 import { Route as ManageVocabularyIndexRouteImport } from './routes/_manage/vocabulary/index'
 import { Route as ManageTasksIndexRouteImport } from './routes/_manage/tasks/index'
@@ -51,6 +52,11 @@ const PreclassGuideIdRoute = PreclassGuideIdRouteImport.update({
 const PaperIdRoute = PaperIdRouteImport.update({
   id: '/paper/$id',
   path: '/paper/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListeningIdRoute = ListeningIdRouteImport.update({
+  id: '/listening/$id',
+  path: '/listening/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnswerIdRoute = AnswerIdRouteImport.update({
@@ -96,6 +102,7 @@ const ManagePaperDetailIdRoute = ManagePaperDetailIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/answer/$id': typeof AnswerIdRoute
+  '/listening/$id': typeof ListeningIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/print/$id': typeof PrintIdRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/answer/$id': typeof AnswerIdRoute
+  '/listening/$id': typeof ListeningIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/print/$id': typeof PrintIdRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_manage': typeof ManageRouteWithChildren
   '/answer/$id': typeof AnswerIdRoute
+  '/listening/$id': typeof ListeningIdRoute
   '/paper/$id': typeof PaperIdRoute
   '/preclass-guide/$id': typeof PreclassGuideIdRoute
   '/print/$id': typeof PrintIdRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/answer/$id'
+    | '/listening/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/print/$id'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/answer/$id'
+    | '/listening/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/print/$id'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_manage'
     | '/answer/$id'
+    | '/listening/$id'
     | '/paper/$id'
     | '/preclass-guide/$id'
     | '/print/$id'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   ManageRoute: typeof ManageRouteWithChildren
   AnswerIdRoute: typeof AnswerIdRoute
+  ListeningIdRoute: typeof ListeningIdRoute
   PaperIdRoute: typeof PaperIdRoute
   PreclassGuideIdRoute: typeof PreclassGuideIdRoute
   PrintIdRoute: typeof PrintIdRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/paper/$id'
       fullPath: '/paper/$id'
       preLoaderRoute: typeof PaperIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listening/$id': {
+      id: '/listening/$id'
+      path: '/listening/$id'
+      fullPath: '/listening/$id'
+      preLoaderRoute: typeof ListeningIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/answer/$id': {
@@ -330,6 +350,7 @@ const ManageRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   ManageRoute: ManageRouteWithChildren,
   AnswerIdRoute: AnswerIdRoute,
+  ListeningIdRoute: ListeningIdRoute,
   PaperIdRoute: PaperIdRoute,
   PreclassGuideIdRoute: PreclassGuideIdRoute,
   PrintIdRoute: PrintIdRoute,

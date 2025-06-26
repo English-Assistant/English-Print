@@ -5,6 +5,7 @@ import { ExamPaperPage } from '@/components/ExamPaperPage';
 import { AnswerPage } from '@/components/AnswerPage';
 import { CopyExercisePage } from '@/components/CopyExercisePage';
 import { PreclassGuidePage } from '@/components/PreclassGuidePage';
+import { ListeningPage } from '@/components/ListeningPage';
 import { useTitle } from 'ahooks';
 
 // 创建一个新的文件路由
@@ -43,7 +44,11 @@ function ContentAggregationPage() {
     {
       title: '课前导读',
       content: (
-        <PreclassGuidePage paper={paper} title={`${paper.title} 课程导读`} />
+        <PreclassGuidePage
+          paper={paper}
+          course={course}
+          title={`${paper.title} 课程导读`}
+        />
       ),
       visible: !!paper.preclass,
     },
@@ -57,6 +62,17 @@ function ContentAggregationPage() {
         />
       ),
       visible: !!paper.copyJson,
+    },
+    {
+      title: '听力素材',
+      content: (
+        <ListeningPage
+          paper={paper}
+          course={course}
+          title={`${paper.title} 听力素材`}
+        />
+      ),
+      visible: !!paper.listeningJson,
     },
     {
       title: '试卷',

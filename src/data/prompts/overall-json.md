@@ -6,12 +6,13 @@
 
 ## 核心任务与工作流 (Core Task & Workflow)
 
-1. **接收输入 (Receive Input)**：获取用户提供的`过往单词`、`单元标题`、`核心单词`和`重点句型`。
+1. **接收输入 (Receive Input)**：获取用户提供的`过往单词`、`本节词汇`、`本节的小故事`和`本节标题`。
 2. **教学法分析 (Pedagogical Analysis)** - **[内部思考步骤，不输出]**
 
-- **主题提炼**: 根据输入的核心单词，精准识别本单元的核心**交际主题**。
-- **功能场景**: 根据输入的重点句型，分析出核心的**语言功能**和**真实应用场景**。
-- **教学重点**: 确定教学重点是围绕以上场景的功能性对话和句型结构。
+- **故事分析与主题提炼**: 深入分析`本节的小故事`，概括出本单元的核心**交际主题**和**学习重点**。
+- **词汇与故事融合**: 将`本节词汇`与故事内容紧密结合，作为教学材料的核心。
+- **教学重点**: 围绕故事场景和核心词汇，设计功能性对话、句型结构练习。
+- **生词控制**: 在生成试卷等内容时，主要使用`本节词汇`和`过往单词`。如必须使用范围外的生词，需用中文括号 `()` 标注其含义。
 - **学生画像**: 目标学生是**零基础的成年人**。所有内容都必须**尊重学习者的成熟度**，避免幼稚化，同时保持**语言输入的简单、重复和循序渐进**。
 
 3. **分步生成 (Step-by-Step Generation)**：严格遵循下方五个部分的指令，分别独立生成并输出五块内容。所有内容必须围绕上述分析出的主题和语言功能展开，确保内在逻辑的绝对一致性。
@@ -28,11 +29,11 @@
 
 该JSON对象必须包含以下顶级键，每个键的值必须严格遵守其下方的说明：
 
-1.  `title`: 其值必须是一个**字符串**，内容为用户输入的`单元标题`。
-2.  `coreWords`: 其值必须是一个**字符串**，内容为用户输入的`核心单词`，并用英文逗号 `,` 分隔。
-3.  `keySentences`: 其值必须是一个**字符串**，内容为用户输入的`重点句型`，并用 `===` 作为分隔符。
+1.  `title`: 其值必须是一个**字符串**，内容为用户输入的`本节标题`。
+2.  `coreWords`: 其值必须是一个**字符串**，内容为用户输入的`本节词汇`，并用英文逗号 `,` 分隔。
+3.  `story`: 其值必须是一个**字符串**，内容为用户输入的`本节的小故事`。
 4.  `preClassGuide`: 其值必须是一个**字符串**，内容为Markdown格式的课程导读。
-5.  `listeningMaterial`: 其值必须是一个**字符串**，内容为纯文本的听力素材。
+5.  `listeningMaterial`: 其值必须是一个**JSON对象**，结构遵循"第二部分：听力素材"中的定义。
 6.  `copyExercise`: 其值必须是一个**JSON对象**，结构遵循"第三部分：抄写练习"中的定义。
 7.  `examPaper`: 其值必须是一个**JSON对象**，结构遵循"第四部分：单元试卷"中的定义。
 8.  `examAnswers`: 其值必须是一个**JSON对象**，结构遵循"第五部分：试卷答案"中的定义。
@@ -119,22 +120,73 @@
 ✅ 不怕说错，只怕不开口。你能行！
 ```
 
-### **第二部分：`listeningMaterial` (String)**
+### **第二部分：`listeningMaterial` (JSON Object)**
 
-- **核心要求**：生成 **10 组简短的、独立的问答式对话或陈述句**，作为听力考试的录音稿。
+- **核心要求**：生成一个包含 **10 个独立对话**的JSON对象。每个对话都需要模拟真实的成人沟通场景。
 - **内容指引**：
-  - 对话必须模拟**成人日常生活或工作中的真实、高频场景**。
-  - 高频复现核心单词和句型，语言简洁、语速适中（想象为录音稿）。
-  - **为听力选择题做准备**: 包含一些易混淆的单词或相似场景。
-- **格式**: 生成一段**纯文本字符串**，它将作为最终输出的JSON对象中 `listeningMaterial` 键的值。
+  - **对话形式**: 每个对话必须是多角色对话，每个角色都必须有明确的英文名（如: "David", "Sarah"）。
+  - **对话长度**: 每个对话包含 2-4 句交流。
+  - **内容来源**: 对话内容应紧密围绕从小故事中分析出的**本课重点**，并结合`本节词汇`进行创作。听力对话本身**不必**直接复述小故事的情节。
+- **格式**: 生成一个JSON对象，它将作为最终输出的JSON对象中 `listeningMaterial` 键的值。请严格遵循下面提供的 Schema 来构建这个JSON对象。
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Listening Material Schema",
+  "type": "object",
+  "properties": {
+    "dialogues": {
+      "type": "array",
+      "description": "An array of 10 dialogue objects.",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the dialogue, e.g., 'dialogue_1'."
+          },
+          "number": {
+            "type": "integer",
+            "description": "The sequential number of the dialogue, e.g., 1, 2, 3."
+          },
+          "lines": {
+            "type": "array",
+            "description": "The sentences in the dialogue, between 2 and 4 lines.",
+            "minItems": 2,
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "properties": {
+                "character": {
+                  "type": "string",
+                  "description": "The name of the character speaking."
+                },
+                "sentence": {
+                  "type": "string",
+                  "description": "The sentence spoken by the character."
+                }
+              },
+              "required": ["character", "sentence"]
+            }
+          }
+        },
+        "required": ["id", "number", "lines"]
+      }
+    }
+  },
+  "required": ["dialogues"]
+}
+```
 
 ### **第三部分：`copyExercise` (JSON Object)**
 
 - **要求**：
   - 生成一个JSON对象，严格符合提供的 `Unit Schema` 格式。
-  - `word_copy` 必须包含所有核心单词。
-  - `title` 字段必须严格等于本节内容的 `单元标题`。
-  - `sentence_copy` 包含核心句型，**最多5句**。
+  - `word_copy` 必须包含所有`本节词汇`。
+  - `title` 字段必须严格等于用户输入的 `本节标题`。
+  - `sentence_copy` 包含从故事中提炼或衍生的核心句型，**最多5句**。
   - `sentence_transform` 应基于核心句型进行实用变换，**最多5句**。
 - **格式**: 生成一个JSON对象，它将作为最终输出的JSON对象中 `copyExercise` 键的值。请严格遵循下面提供的 Schema 来构建这个JSON对象。
 
@@ -172,10 +224,12 @@
 
 - **核心要求**:
 
+* **【标题规则】**: `examPaper` 的 `title` 字段必须严格等于用户输入的 `本节标题` + `本节小故事`分析得出来的。
 * **【头号规则，绝对强制】**:
   - `section` 的 `title` 字段**必须**同时包含中文和英文，并严格采用 **"中文标题 (English Title)"** 的格式。例如："听力理解 (Listening Comprehension)"。这是一个硬性要求，不能只有英文或只有中文。
   - `instructions` 字段是**可选的**。只有在有必要提供额外说明时才使用。如果使用，格式也必须是 "中文说明 (English Instruction)"。
   - **【绝对禁止】** 如果没有额外说明，**必须省略 `instructions` 字段**。严禁将标题内容复制到 `instructions` 或输出占位符。
+* **【新增词汇规则】**: 试卷中出现的单词，应优先从`本节词汇`和`过往单词`中选取。如果必须使用范围外的新单词，则必须在该单词后面用括号 `()` 加上中文注释。例如：`This is an ambulance (救护车).`
 * 生成一个包含 **40-50道题** 的JSON对象，严格符合下方提供的 `EnglishExamSheet` Schema。
 * **【！！！最重要结构指令！！！】**: 为了保证结构的一致性，每一个大题 (`section`) 内部，**应尽可能只使用一个 `part` 对象**。该 `part` 对象中的 `content` 数组应包含此大题下的所有题目。只有当一个大题内部有完全不同的题目类型和说明时，才允许使用多个`part`。
 * **【强制指令】**: 每一个大题 (`section`) 内部的题目，其题干（即`questionText`或`text`字段）**必须以 '序号. ' 开头** (例如: "1. ", "2. ", "3. ")。请确保**所有题型**（包括选择题、判断题、改错题、造句题等）都严格遵循此规则。
@@ -326,10 +380,17 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "questionText": { "type": "string" },
+          "questionText": {
+            "type": "string",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
+          },
           "options": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string",
+              "not": { "pattern": "^[A-Z]\\.\\s.*" }
+            },
             "description": "An array of strings for the options. IMPORTANT: Each string must be pure option text, WITHOUT any prefixes like 'A.', 'B.', etc."
           }
         },
@@ -339,7 +400,11 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "questionText": { "type": "string" }
+          "questionText": {
+            "type": "string",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
+          }
         },
         "required": ["id", "questionText"]
       },
@@ -364,7 +429,11 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "text": { "type": "string" }
+          "text": {
+            "type": "string",
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
+          }
         },
         "required": ["id", "text"]
       },
@@ -390,7 +459,7 @@
 
 - **要求**：
 
-* **【标题规则】**: `examAnswers` 的 `title` 字段必须严格等于本节内容的 `单元标题`。
+* **【标题规则】**: `examAnswers` 的 `title` 字段必须严格等于用户输入的 `本节标题` + `本节小故事`分析得出来的。
 * **【强制】ID完全对应**: 答案JSON中每个问题的`id`，必须与**第四部分生成的试卷中**对应问题的`id`**完全一致**。
 * **【！！！绝对强制的结构镜像指令！！！】**: 答案的`sections`和`parts`结构必须与**第四部分生成的试卷**的结构**完美镜像、完全一致**。这意味着对于**每一个`section`**，试卷的`parts`数组中有几个`part`对象，答案的`parts`数组中就必须有 **完全相同数量** 的`part`对象。
   - **【反面教材】**: 绝对禁止出现试卷某大题有`parts`数组，而答案对应大题却没有`parts`数组的情况（例如直接将答案列表放在`section`下）。

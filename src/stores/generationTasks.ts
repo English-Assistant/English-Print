@@ -111,7 +111,7 @@ ${paper.title}
 - **核心单词**:
 ${paper.coreWords}
 
-- **重点句型**:
+- **本节小故事**:
 ${paper.keySentences}`;
 
         const payload = {
@@ -130,7 +130,7 @@ ${paper.keySentences}`;
 
         usePaperStore.getState().updatePaper(paper.id, {
           preclass: result.preClassGuide,
-          listeningMaterial: result.listeningMaterial,
+          listeningJson: result.listeningMaterial, // <-- 这里是修改的地方
           copyJson: result.copyExercise,
           examJson: result.examPaper,
           answerJson: result.examAnswers,

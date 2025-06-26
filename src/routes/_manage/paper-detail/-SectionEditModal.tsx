@@ -19,11 +19,12 @@ import {
   validateAnswer,
   validateCopy,
   validateExam,
+  validateListening,
 } from '@/utils/schemaValidators';
 
 export type SectionKey =
   | 'preclass'
-  | 'listeningMaterial'
+  | 'listeningJson'
   | 'copyJson'
   | 'examJson'
   | 'answerJson';
@@ -51,7 +52,7 @@ export default function SectionEditModal({
       const paper = papers.find((p) => p.id === paperId);
       if (!paper || !sectionKey) return;
 
-      if (sectionKey === 'preclass' || sectionKey === 'listeningMaterial') {
+      if (sectionKey === 'preclass') {
         form.setFieldsValue({ [sectionKey]: paper[sectionKey] ?? '' });
       } else {
         const jsonValue = paper[sectionKey] ?? {};
@@ -67,7 +68,7 @@ export default function SectionEditModal({
     try {
       const values = await form.validateFields();
 
-      if (sectionKey === 'preclass' || sectionKey === 'listeningMaterial') {
+      if (sectionKey === 'preclass') {
         updatePaper(paperId, { [sectionKey]: values[sectionKey] });
       } else {
         const payload = values.json as Record<string, unknown>;
@@ -86,7 +87,7 @@ export default function SectionEditModal({
 
   const titleMap: Record<SectionKey, string> = {
     preclass: '课程导读',
-    listeningMaterial: '听力素材',
+    listeningJson: '听力素材',
     copyJson: '抄写练习',
     examJson: '试卷',
     answerJson: '答案卡',
@@ -104,17 +105,11 @@ export default function SectionEditModal({
             type="secondary"
             style={{ fontSize: token.fontSizeSM }}
           >
-            {sectionKey === 'preclass' || sectionKey === 'listeningMaterial'
-              ? '(长文本格式)'
-              : '(JSON格式)'}
+            {sectionKey === 'preclass' ? '(长文本格式)' : '(JSON格式)'}
           </Typography.Text>
         </Space>
       }
-      width={
-        sectionKey === 'preclass' || sectionKey === 'listeningMaterial'
-          ? 800
-          : 1000
-      }
+      width={sectionKey === 'preclass' ? 800 : 1000}
       style={{ top: 20 }}
       // styles={{ body: { padding: '24px 24px 8px' } }}
       onOk={handleSave}
@@ -122,8 +117,7 @@ export default function SectionEditModal({
       okText="确定"
       cancelText="取消"
       footer={(_, { OkBtn, CancelBtn }) => {
-        const isJsonMode =
-          sectionKey !== 'preclass' && sectionKey !== 'listeningMaterial';
+        const isJsonMode = sectionKey !== 'preclass';
         return (
           <>
             <CancelBtn />
@@ -139,7 +133,7 @@ export default function SectionEditModal({
         layout="vertical"
         style={{ overflow: 'auto', maxHeight: 'calc(100vh - 200px)' }}
       >
-        {sectionKey === 'preclass' || sectionKey === 'listeningMaterial' ? (
+        {sectionKey === 'preclass' ? (
           <>
             <Alert
               message="支持纯文本或 Markdown 格式编写。"
@@ -187,7 +181,9 @@ export default function SectionEditModal({
                           ? validateExam
                           : sectionKey === 'answerJson'
                             ? validateAnswer
-                            : null;
+                            : sectionKey === 'listeningJson'
+                              ? validateListening
+                              : null;
 
                     if (validator) {
                       valid = validator(v);

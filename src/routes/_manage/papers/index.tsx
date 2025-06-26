@@ -7,7 +7,6 @@ import {
   Space,
   Popconfirm,
   Tooltip,
-  Dropdown,
   Row,
   Col,
   theme,
@@ -22,7 +21,6 @@ import {
   ClockCircleOutlined,
   FileTextOutlined,
   CopyOutlined,
-  DownOutlined,
   DeleteOutlined,
   SyncOutlined,
   PrinterOutlined,
@@ -39,7 +37,6 @@ import NewPaperModal from './-NewPaperModal';
 import BatchNewPaperModal from './-BatchNewPaperModal';
 import BatchNewPaperJsonModal from './-BatchNewPaperJsonModal';
 import { useNavigate } from '@tanstack/react-router';
-import type { MenuProps } from 'antd';
 import type { Paper } from '@/data/types/paper';
 
 export const Route = createFileRoute('/_manage/papers/')({
@@ -75,38 +72,6 @@ function PaperManagement() {
     startGeneration(paper);
     message.info(`《${paper.title}》已加入后台生成队列`);
   };
-
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    e.domEvent.stopPropagation();
-    if (e.key === 'batch-new') {
-      if (apiUrl && apiToken) {
-        setIsBatchNewModalOpen(true);
-      }
-    } else if (e.key === 'batch-json') {
-      setIsBatchJsonModalOpen(true);
-    }
-  };
-
-  const menuItems: MenuProps['items'] = [
-    {
-      label: (
-        <Tooltip
-          placement="left"
-          title={!apiUrl || !apiToken ? '请先在"接口设置"中配置 API 信息' : ''}
-        >
-          批量新增
-        </Tooltip>
-      ),
-      key: 'batch-new',
-      icon: <CopyOutlined />,
-      disabled: !apiUrl || !apiToken,
-    },
-    {
-      label: '批量新增 (JSON)',
-      key: 'batch-json',
-      icon: <CopyOutlined />,
-    },
-  ];
 
   const filtered = papers
     .filter((p) => {
@@ -148,15 +113,22 @@ function PaperManagement() {
             />
           </Space>
           <Space>
-            <Dropdown.Button
+            <Button
               type="primary"
-              icon={<DownOutlined />}
-              onClick={() => setEditingId('new')}
-              menu={{ items: menuItems, onClick: handleMenuClick }}
+              icon={<CopyOutlined />}
+              onClick={() => setIsBatchNewModalOpen(true)}
             >
-              <PlusOutlined style={{ marginRight: 8 }} />
+              批量新增
+            </Button>
+            <Button
+              icon={<CopyOutlined />}
+              onClick={() => setIsBatchJsonModalOpen(true)}
+            >
+              批量新增 (JSON)
+            </Button>
+            <Button icon={<PlusOutlined />} onClick={() => setEditingId('new')}>
               新建试卷
-            </Dropdown.Button>
+            </Button>
           </Space>
         </div>
       </Card>
@@ -207,7 +179,7 @@ function PaperManagement() {
                           e.stopPropagation();
                           handleGenerateClick(paper);
                         }}
-                        disabled={isGenerating}
+                        disabled={isGenerating || !apiUrl || !apiToken}
                       >
                         {isGenerating ? '生成中' : '生成'}
                       </Button>

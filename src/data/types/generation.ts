@@ -1,6 +1,7 @@
 import type { ExamPaper } from './exam';
 import type { ExamAnswerSheet } from './answer';
 import type { CopyPracticeSheet } from './copy';
+import type { ListeningMaterial } from './listening';
 
 /**
  * @file
@@ -16,13 +17,13 @@ export interface GeneratedPaperData {
   title?: string;
   /** 核心单词，逗号分隔 */
   coreWords?: string;
-  /** 重点句型，===分隔 */
-  keySentences?: string;
+  /** 本节小故事 */
+  story?: string;
   /** 课程导读内容（Markdown文本） */
   preClassGuide: string;
 
-  /** 听力材料（纯文本） */
-  listeningMaterial: string;
+  /** 听力材料（JSON对象） */
+  listeningMaterial: ListeningMaterial;
 
   /** 抄写练习的JSON数据 */
   copyExercise: CopyPracticeSheet;
