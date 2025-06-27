@@ -29,10 +29,6 @@ function VocabularyPage() {
   const [form] = Form.useForm();
   const { message } = App.useApp();
 
-  const coursesMap = useMemo(() => {
-    return new Map(courses.map((c) => [c.id, c]));
-  }, [courses]);
-
   useEffect(() => {
     form.setFieldsValue({ words: baseWords.join('\n') });
   }, [baseWords, form]);
@@ -46,23 +42,56 @@ function VocabularyPage() {
     message.success('词汇库已更新！');
   };
 
-  const papersWithWords = useMemo(
-    () =>
-      papers
-        .filter((p: Paper) => p.coreWords && p.coreWords.trim().length > 0)
-        .map((p: Paper) => {
-          const courseName = p.courseId
-            ? coursesMap.get(p.courseId)?.title
-            : '未分类';
+  const vocabularyByCourse = useMemo(() => {
+    const grouped = new Map<
+      string,
+      {
+        courseTitle: string;
+        papers: { id: string; title: string; words: string }[];
+      }
+    >();
+
+    courses.forEach((course) => {
+      grouped.set(course.id, {
+        courseTitle: course.title,
+        papers: [],
+      });
+    });
+    grouped.set('uncategorized', { courseTitle: '未分类', papers: [] });
+
+    papers
+      .filter((p: Paper) => p.coreWords && p.coreWords.trim().length > 0)
+      .forEach((p: Paper) => {
+        const courseId = p.courseId || 'uncategorized';
+        const courseGroup = grouped.get(courseId);
+
+        if (courseGroup) {
           const words = p.coreWords!.split(/,|\s+/).filter(Boolean);
-          return {
+          courseGroup.papers.push({
             id: p.id,
-            title: `${p.title} - ${courseName}`,
+            title: p.title,
             words: words.join(', '),
-          };
-        }),
-    [papers, coursesMap],
-  );
+          });
+        }
+      });
+
+    const result: {
+      courseId: string;
+      courseTitle: string;
+      papers: { id: string; title: string; words: string }[];
+    }[] = [];
+    grouped.forEach((value, key) => {
+      if (value.papers.length > 0) {
+        result.push({
+          courseId: key,
+          courseTitle: value.courseTitle,
+          papers: value.papers,
+        });
+      }
+    });
+
+    return result;
+  }, [papers, courses]);
 
   return (
     <Row gutter={16}>
@@ -103,23 +132,41 @@ function VocabularyPage() {
             <Typography.Title level={5} style={{ marginTop: '1rem' }}>
               基础词汇
             </Typography.Title>
-            <Typography.Paragraph style={{ wordBreak: 'break-all' }} copyable>
+            <Typography.Paragraph
+              style={{ wordBreak: 'break-all' }}
+              copyable={
+                baseWords.length > 0 ? { text: baseWords.join(', ') } : false
+              }
+            >
               {baseWords.join(', ')}
             </Typography.Paragraph>
 
             <Divider>课程单元词汇</Divider>
 
-            {papersWithWords.map((p) => (
-              <div key={p.id}>
-                <Typography.Title level={5}>{p.title}</Typography.Title>
-                <Typography.Paragraph
-                  style={{ wordBreak: 'break-all' }}
-                  copyable
-                >
-                  {p.words}
-                </Typography.Paragraph>
-              </div>
-            ))}
+            {vocabularyByCourse.map(
+              ({ courseId, courseTitle, papers: coursePapers }) => (
+                <div key={courseId} style={{ marginBottom: '1.5rem' }}>
+                  <Typography.Title level={5}>{courseTitle}</Typography.Title>
+                  {coursePapers.map((p) => (
+                    <div
+                      key={p.id}
+                      style={{ paddingLeft: '1rem', marginTop: '0.5rem' }}
+                    >
+                      <Typography.Text strong>{p.title}</Typography.Text>
+                      <Typography.Paragraph
+                        style={{
+                          wordBreak: 'break-all',
+                          marginTop: '0.2rem',
+                        }}
+                        copyable
+                      >
+                        {p.words}
+                      </Typography.Paragraph>
+                    </div>
+                  ))}
+                </div>
+              ),
+            )}
           </div>
         </Card>
       </Col>
