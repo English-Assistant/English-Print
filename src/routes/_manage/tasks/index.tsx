@@ -12,6 +12,7 @@ import {
   Tag,
   Typography,
   theme,
+  Tooltip,
 } from 'antd';
 import {
   useCourseStore,
@@ -118,6 +119,18 @@ function TasksPage() {
 
   const baseColumns: ColumnsType<GenerationTask> = [
     {
+      title: '任务 ID',
+      dataIndex: 'id',
+      key: 'id',
+      render: (id: string) => (
+        <Typography.Text copyable={{ text: id }} style={{ maxWidth: 120 }}>
+          <Tooltip title={id}>
+            <span>...{id.slice(-6)}</span>
+          </Tooltip>
+        </Typography.Text>
+      ),
+    },
+    {
       title: '试卷标题',
       dataIndex: 'paperTitle',
       key: 'paperTitle',
@@ -127,6 +140,16 @@ function TasksPage() {
       dataIndex: 'courseId',
       key: 'courseId',
       render: (courseId) => courseMap.get(courseId) || '未分类',
+    },
+
+    {
+      title: '操作时间',
+      key: 'updatedTime',
+      sorter: (a, b) => (b.endTime || b.startTime) - (a.endTime || a.startTime),
+      render: (_, record) => {
+        const time = record.endTime || record.startTime;
+        return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+      },
     },
   ];
 
@@ -150,12 +173,6 @@ function TasksPage() {
           </Tag>
         );
       },
-    },
-    {
-      title: '开始时间',
-      dataIndex: 'startTime',
-      key: 'startTime',
-      render: (time) => dayjs(time).format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       title: '已耗时',
@@ -188,13 +205,6 @@ function TasksPage() {
   const successColumns: ColumnsType<GenerationTask> = [
     ...baseColumns,
     {
-      title: '完成时间',
-      dataIndex: 'endTime',
-      key: 'endTime',
-      render: (time) =>
-        time ? dayjs(time).format('YYYY-MM-DD HH:mm:ss') : '-',
-    },
-    {
       title: '总耗时',
       key: 'duration',
       render: (_, record) => {
@@ -223,13 +233,6 @@ function TasksPage() {
 
   const errorColumns: ColumnsType<GenerationTask> = [
     ...baseColumns,
-    {
-      title: '失败时间',
-      dataIndex: 'endTime',
-      key: 'endTime',
-      render: (time) =>
-        time ? dayjs(time).format('YYYY-MM-DD HH:mm:ss') : '-',
-    },
     {
       title: '失败原因',
       dataIndex: 'error',

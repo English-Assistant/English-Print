@@ -25,9 +25,11 @@ import {
   DeleteOutlined,
   SyncOutlined,
   PrinterOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useLocalStorageState } from 'ahooks';
 import {
   usePaperStore,
   useCourseStore,
@@ -39,6 +41,7 @@ import BatchNewPaperModal from './-BatchNewPaperModal';
 import BatchNewPaperJsonModal from './-BatchNewPaperJsonModal';
 import { useNavigate } from '@tanstack/react-router';
 import type { Paper } from '@/data/types/paper';
+import type { GenerationTask } from '@/stores';
 
 export const Route = createFileRoute('/_manage/papers/')({
   component: PaperManagement,
@@ -48,30 +51,34 @@ function PaperManagement() {
   const { papers, deletePaper } = usePaperStore();
   const { courses } = useCourseStore();
   const { apiUrl, apiToken } = useSettingsStore();
-  const { getTaskByPaperId, startGeneration } = useGenerationTaskStore();
+  const { startGeneration, cancelTask } = useGenerationTaskStore();
+
   const tasks = useGenerationTaskStore((s) => s.tasks);
 
-  const [keyword, setKeyword] = useState('');
+  const getLatestTaskByPaperId = useCallback(
+    (paperId: string): GenerationTask | undefined => {
+      const tasksForPaper = tasks.filter((t) => t.paperId === paperId);
+      if (tasksForPaper.length === 0) return undefined;
+      return tasksForPaper.sort((a, b) => b.startTime - a.startTime)[0];
+    },
+    [tasks],
+  );
+
+  const [keyword, setKeyword] = useLocalStorageState('paper-filter-keyword', {
+    defaultValue: '',
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isBatchNewModalOpen, setIsBatchNewModalOpen] = useState(false);
   const [isBatchJsonModalOpen, setIsBatchJsonModalOpen] = useState(false);
-  const [selectedCourseId, setSelectedCourseId] = useState<
+  const [selectedCourseId, setSelectedCourseId] = useLocalStorageState<
     string | undefined
-  >();
-  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  >('paper-filter-course', {
+    defaultValue: undefined,
+  });
 
   const navigate = useNavigate();
   const { token } = theme.useToken();
   const { message } = App.useApp();
-
-  useEffect(() => {
-    if (generatingId) {
-      const task = getTaskByPaperId(generatingId);
-      if (task?.status === 'processing') {
-        setGeneratingId(null);
-      }
-    }
-  }, [tasks, generatingId, getTaskByPaperId]);
 
   const handleGenerateClick = (paper: Paper) => {
     if (!paper.title || !paper.coreWords || !paper.keySentences) {
@@ -82,7 +89,6 @@ function PaperManagement() {
       message.error('请先在"接口设置"中配置 API 信息');
       return;
     }
-    setGeneratingId(paper.id);
     startGeneration(paper);
     message.info(`《${paper.title}》已加入后台生成队列`);
   };
@@ -110,6 +116,7 @@ function PaperManagement() {
           <Space>
             <Input.Search
               placeholder="搜索试卷标题..."
+              value={keyword}
               onSearch={(value) => setKeyword(value)}
               style={{ width: 200 }}
               allowClear
@@ -119,6 +126,7 @@ function PaperManagement() {
               allowClear
               style={{ width: 200 }}
               placeholder="按课程筛选"
+              value={selectedCourseId}
               onChange={(value) => setSelectedCourseId(value)}
               options={courses.map((c) => ({
                 label: c.title,
@@ -155,8 +163,9 @@ function PaperManagement() {
       ) : (
         <Row gutter={[24, 24]}>
           {filtered.map((paper) => {
-            const task = getTaskByPaperId(paper.id);
+            const task = getLatestTaskByPaperId(paper.id);
             const isGenerating = task?.status === 'processing';
+            const isPending = task?.status === 'pending';
             const isGenerated =
               paper.examJson ||
               paper.answerJson ||
@@ -202,30 +211,55 @@ function PaperManagement() {
                         </Button>
                       </Link>
                     </Tooltip>,
-                    <Tooltip title="基于标题、单词、句型生成试卷内容">
-                      <Button
-                        key="generate"
-                        type="text"
-                        icon={<SyncOutlined />}
-                        loading={isGenerating || generatingId === paper.id}
-                        style={{
-                          width: '100%',
+                    isGenerating || isPending ? (
+                      <Popconfirm
+                        key="cancel"
+                        title="确认取消?"
+                        description="取消后任务将标记为失败，可从任务管理中心重试。"
+                        onConfirm={(e) => {
+                          e?.stopPropagation();
+                          if (task) {
+                            cancelTask(task.id);
+                            message.success('任务已取消');
+                          }
                         }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGenerateClick(paper);
-                        }}
-                        disabled={!apiUrl || !apiToken}
+                        onCancel={(e) => e?.stopPropagation()}
+                        okText="确定"
+                        cancelText="取消"
                       >
-                        {isGenerating || generatingId === paper.id
-                          ? '生成中'
-                          : task?.status === 'error'
+                        <Button
+                          type="text"
+                          danger
+                          icon={<StopOutlined />}
+                          style={{ width: '100%' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          取消生成
+                        </Button>
+                      </Popconfirm>
+                    ) : (
+                      <Tooltip title="基于标题、单词、句型生成试卷内容">
+                        <Button
+                          key="generate"
+                          type="text"
+                          icon={<SyncOutlined />}
+                          style={{
+                            width: '100%',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleGenerateClick(paper);
+                          }}
+                          disabled={!apiUrl || !apiToken}
+                        >
+                          {task?.status === 'error'
                             ? '重试生成'
                             : isGenerated
                               ? '重新生成'
                               : '生成'}
-                      </Button>
-                    </Tooltip>,
+                        </Button>
+                      </Tooltip>
+                    ),
                     <Button
                       key="edit"
                       type="text"
@@ -309,7 +343,8 @@ function PaperManagement() {
                         )}
                         {(task?.status === 'success' ||
                           (!task && isGenerated)) &&
-                          !isGenerating && <Tag color="green">已生成</Tag>}
+                          !isGenerating &&
+                          !isPending && <Tag color="green">已生成</Tag>}
                         {task?.status === 'error' && (
                           <Popover
                             title="失败原因"

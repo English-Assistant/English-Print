@@ -23,7 +23,7 @@ export interface GenerationTask {
   result?: GeneratedPaperData;
 }
 
-interface GenerationTaskStore {
+export interface GenerationTaskStore {
   tasks: GenerationTask[];
   startGeneration: (paper: Paper) => Promise<void>;
   cancelTask: (taskId: string) => void;
@@ -34,8 +34,8 @@ interface GenerationTaskStore {
   _runTask: (task: GenerationTask) => Promise<void>;
 }
 
-export const useGenerationTaskStore = create(
-  persist<GenerationTaskStore>(
+export const useGenerationTaskStore = create<GenerationTaskStore>()(
+  persist(
     (set, get) => ({
       tasks: [],
 
