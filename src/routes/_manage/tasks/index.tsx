@@ -23,11 +23,36 @@ import dayjs from 'dayjs';
 import VanillaJsonEditor from '@/components/VanillaJsonEditor';
 import type { GeneratedPaperData } from '@/data/types/generation';
 import type { ColumnsType } from 'antd/es/table';
+import { ClockCircleOutlined, SyncOutlined } from '@ant-design/icons';
 
 // 创建文件路由
 export const Route = createFileRoute('/_manage/tasks/')({
   component: TasksPage,
 });
+
+/**
+ * 将毫秒时长格式化为更易读的字符串（如 X 分 Y 秒）
+ * @param milliseconds - 毫秒数
+ */
+function formatDuration(milliseconds: number): string {
+  if (!milliseconds || milliseconds < 0) {
+    return '0 秒';
+  }
+
+  const totalSeconds = Math.floor(milliseconds / 1000);
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours} 时 ${minutes} 分`;
+  }
+  if (minutes > 0) {
+    return `${minutes} 分 ${seconds} 秒`;
+  }
+  return `${seconds} 秒`;
+}
 
 /**
  * 一个实时显示已过时间的组件
@@ -44,7 +69,7 @@ function ElapsedTime({ startTime }: { startTime: number }) {
   }, [startTime]);
 
   // 将毫秒转换为 秒
-  return <span>{Math.floor(elapsed / 1000)} 秒</span>;
+  return <span>{formatDuration(elapsed)}</span>;
 }
 
 /**
@@ -81,7 +106,9 @@ function TasksPage() {
         : tasks.filter((t) => t.courseId === selectedCourseId);
 
     return {
-      processingTasks: filteredTasks.filter((t) => t.status === 'processing'),
+      processingTasks: filteredTasks.filter(
+        (t) => t.status === 'processing' || t.status === 'pending',
+      ),
       successTasks: filteredTasks.filter((t) => t.status === 'success'),
       errorTasks: filteredTasks.filter((t) => t.status === 'error'),
     };
@@ -105,6 +132,25 @@ function TasksPage() {
 
   const processingColumns: ColumnsType<GenerationTask> = [
     ...baseColumns,
+    {
+      title: '状态',
+      key: 'status',
+      dataIndex: 'status',
+      render: (status: GenerationTask['status']) => {
+        if (status === 'pending') {
+          return (
+            <Tag icon={<ClockCircleOutlined />} color="default">
+              排队中
+            </Tag>
+          );
+        }
+        return (
+          <Tag icon={<SyncOutlined spin />} color="processing">
+            处理中
+          </Tag>
+        );
+      },
+    },
     {
       title: '开始时间',
       dataIndex: 'startTime',
@@ -154,7 +200,7 @@ function TasksPage() {
       render: (_, record) => {
         if (!record.endTime) return '-';
         const duration = record.endTime - record.startTime;
-        return `${Math.floor(duration / 1000)} 秒`;
+        return formatDuration(duration);
       },
     },
     {
@@ -188,7 +234,13 @@ function TasksPage() {
       title: '失败原因',
       dataIndex: 'error',
       key: 'error',
-      render: (error) => <Tag color="error">{error || '未知错误'}</Tag>,
+      render: (error) => (
+        <div style={{ maxWidth: 400, maxHeight: 80, overflow: 'auto' }}>
+          <Tag color="error" style={{ whiteSpace: 'pre-wrap' }}>
+            {error || '未知错误'}
+          </Tag>
+        </div>
+      ),
     },
     {
       title: '操作',

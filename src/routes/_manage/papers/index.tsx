@@ -27,7 +27,7 @@ import {
   PrinterOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   usePaperStore,
   useCourseStore,
@@ -49,6 +49,7 @@ function PaperManagement() {
   const { courses } = useCourseStore();
   const { apiUrl, apiToken } = useSettingsStore();
   const { getTaskByPaperId, startGeneration } = useGenerationTaskStore();
+  const tasks = useGenerationTaskStore((s) => s.tasks);
 
   const [keyword, setKeyword] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -57,9 +58,20 @@ function PaperManagement() {
   const [selectedCourseId, setSelectedCourseId] = useState<
     string | undefined
   >();
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const { token } = theme.useToken();
   const { message } = App.useApp();
+
+  useEffect(() => {
+    if (generatingId) {
+      const task = getTaskByPaperId(generatingId);
+      if (task?.status === 'processing') {
+        setGeneratingId(null);
+      }
+    }
+  }, [tasks, generatingId, getTaskByPaperId]);
 
   const handleGenerateClick = (paper: Paper) => {
     if (!paper.title || !paper.coreWords || !paper.keySentences) {
@@ -70,6 +82,7 @@ function PaperManagement() {
       message.error('请先在"接口设置"中配置 API 信息');
       return;
     }
+    setGeneratingId(paper.id);
     startGeneration(paper);
     message.info(`《${paper.title}》已加入后台生成队列`);
   };
@@ -82,7 +95,7 @@ function PaperManagement() {
       const courseMatch = !selectedCourseId || p.courseId === selectedCourseId;
       return keywordMatch && courseMatch;
     })
-    .sort((a, b) => dayjs(b.updatedAt).unix() - dayjs(a.updatedAt).unix());
+    .sort((a, b) => dayjs(b.createdAt).unix() - dayjs(a.createdAt).unix());
 
   return (
     <div>
@@ -157,18 +170,30 @@ function PaperManagement() {
                   hoverable
                   style={{ height: '100%' }}
                   actions={[
-                    <Tooltip title="合并打印试卷、答案、导读等">
+                    <Tooltip
+                      title={
+                        !isGenerated
+                          ? '试卷内容未生成，无法打印'
+                          : '合并打印试卷、答案、导读等'
+                      }
+                    >
                       <Link
                         to="/print/$id"
                         params={{ id: paper.id }}
                         target="_blank"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isGenerated) {
+                            e.preventDefault();
+                          }
+                        }}
                         style={{ display: 'block', width: '100%' }}
                       >
                         <Button
                           key="print"
                           type="text"
                           icon={<PrinterOutlined />}
+                          disabled={!isGenerated}
                           style={{
                             width: '100%',
                           }}
@@ -181,7 +206,8 @@ function PaperManagement() {
                       <Button
                         key="generate"
                         type="text"
-                        icon={<SyncOutlined spin={isGenerating} />}
+                        icon={<SyncOutlined />}
+                        loading={isGenerating || generatingId === paper.id}
                         style={{
                           width: '100%',
                         }}
@@ -189,13 +215,15 @@ function PaperManagement() {
                           e.stopPropagation();
                           handleGenerateClick(paper);
                         }}
-                        disabled={isGenerating || !apiUrl || !apiToken}
+                        disabled={!apiUrl || !apiToken}
                       >
-                        {isGenerating
+                        {isGenerating || generatingId === paper.id
                           ? '生成中'
-                          : isGenerated
-                            ? '重新生成'
-                            : '生成'}
+                          : task?.status === 'error'
+                            ? '重试生成'
+                            : isGenerated
+                              ? '重新生成'
+                              : '生成'}
                       </Button>
                     </Tooltip>,
                     <Button
@@ -269,9 +297,19 @@ function PaperManagement() {
                               ?.title || '未知课程'}
                           </Tag>
                         )}
-                        {isGenerated && !task && (
-                          <Tag color="green">已生成</Tag>
+                        {isGenerating && (
+                          <Tag icon={<SyncOutlined spin />} color="processing">
+                            生成中
+                          </Tag>
                         )}
+                        {task?.status === 'pending' && (
+                          <Tag icon={<ClockCircleOutlined />} color="default">
+                            排队中
+                          </Tag>
+                        )}
+                        {(task?.status === 'success' ||
+                          (!task && isGenerated)) &&
+                          !isGenerating && <Tag color="green">已生成</Tag>}
                         {task?.status === 'error' && (
                           <Popover
                             title="失败原因"

@@ -1,30 +1,52 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Button, Card, Space, Typography, Upload, message, Modal } from 'antd';
+import { Button, Card, Space, Typography, Upload, App, Modal } from 'antd';
 import {
   ExportOutlined,
   ImportOutlined,
   DeleteOutlined,
 } from '@ant-design/icons';
-import { entries, set, clear } from 'idb-keyval';
-import merge from 'lodash-es/merge';
+import {
+  useCourseStore,
+  useGenerationTaskStore,
+  usePaperStore,
+  useSettingsStore,
+  useVocabularyStore,
+} from '@/stores';
+import type { CourseStore } from '@/stores/courses';
+import type { PaperStore } from '@/stores/papers';
+import type { GenerationTaskStore } from '@/stores/generationTasks';
+import type { SettingsState } from '@/stores/settings';
+import type { VocabularyStore } from '@/stores/vocabulary';
+import { LAST_COURSE_ID_KEY } from '@/utils/constants';
+
+// 定义 store 名称和对应的 hook
+const STORES = {
+  'course-storage': useCourseStore,
+  'paper-storage': usePaperStore,
+  'generation-tasks-storage': useGenerationTaskStore,
+  'dify-api-settings': useSettingsStore,
+  'vocabulary-storage': useVocabularyStore,
+};
 
 export const Route = createFileRoute('/_manage/data/')({
   component: DataManagement,
 });
 
 function DataManagement() {
+  const { message } = App.useApp();
+
   const handleExport = async () => {
     try {
-      const allEntries = await entries();
-      const data = allEntries.reduce(
-        (acc, [key, value]) => {
-          acc[key as string] = value;
+      // 从每个 store 的 state 中收集数据
+      const dataToExport = Object.entries(STORES).reduce(
+        (acc, [key, storeHook]) => {
+          acc[key] = storeHook.getState();
           return acc;
         },
         {} as Record<string, unknown>,
       );
 
-      const json = JSON.stringify(data, null, 2);
+      const json = JSON.stringify(dataToExport, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -56,25 +78,41 @@ function DataManagement() {
           message.error('文件内容为空');
           return;
         }
-        const importedData = JSON.parse(json);
+        const importedData = JSON.parse(json) as Record<string, unknown>;
 
-        const currentEntries = await entries();
-        const currentData = currentEntries.reduce(
-          (acc, [key, value]) => {
-            acc[key as string] = value;
-            return acc;
-          },
-          {} as Record<string, unknown>,
-        );
-
-        const mergedData = merge({}, currentData, importedData);
-
-        for (const key in mergedData) {
-          if (Object.prototype.hasOwnProperty.call(mergedData, key)) {
-            await set(key, mergedData[key]);
+        // 遍历导入的数据，并更新对应的 store
+        for (const key in importedData) {
+          if (Object.prototype.hasOwnProperty.call(importedData, key)) {
+            const stateToImport = importedData[key];
+            switch (key) {
+              case 'course-storage':
+                useCourseStore.setState(stateToImport as CourseStore);
+                break;
+              case 'paper-storage':
+                usePaperStore.setState(stateToImport as PaperStore);
+                break;
+              case 'generation-tasks-storage':
+                useGenerationTaskStore.setState(
+                  stateToImport as GenerationTaskStore,
+                );
+                break;
+              case 'dify-api-settings':
+                useSettingsStore.setState(stateToImport as SettingsState);
+                break;
+              case 'vocabulary-storage':
+                useVocabularyStore.setState(stateToImport as VocabularyStore);
+                break;
+              default:
+                break;
+            }
           }
         }
+
         message.success('数据导入成功，请刷新页面以应用更改。');
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } catch (error) {
         console.error('Failed to import data', error);
         message.error('数据导入失败，请确保文件格式正确。');
@@ -94,8 +132,20 @@ function DataManagement() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          await clear();
-          message.success('所有数据已清空。请刷新页面。');
+          // 依次清空每个 store 的持久化数据
+          useCourseStore.persist.clearStorage();
+          usePaperStore.persist.clearStorage();
+          useSettingsStore.persist.clearStorage();
+          useVocabularyStore.persist.clearStorage();
+          useGenerationTaskStore.persist.clearStorage();
+
+          // [新增] 清除课程ID记忆
+          localStorage.removeItem(LAST_COURSE_ID_KEY);
+
+          message.success('所有数据已清空，应用将在2秒后自动刷新。');
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         } catch (error) {
           console.error('Failed to clear data', error);
           message.error('数据清空失败。');

@@ -26,7 +26,9 @@
           "type": "string"
         },
         "title": {
-          "type": "string"
+          "type": "string",
+          "description": "The title of the section. MUST follow the format '中文标题 (English Title)'.",
+          "pattern": "^[\\u4e00-\\u9fa5\\s]+\\(.*\\)$"
         },
         "points": {
           "type": "number"
@@ -188,8 +190,8 @@
           },
           "questionText": {
             "type": "string",
-            "pattern": "^\\d+\\.\\s.*",
-            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
           },
           "options": {
             "type": "array",
@@ -216,8 +218,8 @@
           },
           "questionText": {
             "type": "string",
-            "pattern": "^\\d+\\.\\s.*",
-            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
           }
         },
         "required": [
@@ -260,8 +262,8 @@
           },
           "text": {
             "type": "string",
-            "pattern": "^\\d+\\.\\s.*",
-            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ')."
+            "description": "The question text. MUST start with a number, period, and space (e.g., '1. ').",
+            "pattern": "^\\d+\\.\\s.*"
           }
         },
         "required": [
@@ -281,7 +283,11 @@
             "items": {
               "type": "string"
             },
-            "description": "提供给学生用于造句的单词或词组列表"
+            "description": "提供给学生用于造句的、已打乱顺序的单词或词组列表"
+          },
+          "hint": {
+            "type": "string",
+            "description": "该句子的中文翻译提示"
           }
         },
         "required": [

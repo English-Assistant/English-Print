@@ -87,4 +87,5 @@ export interface OpenEndedData {
 export interface GuidedWritingData {
   id: string;
   words: string[]; // 词组，供学生组成句子
+  hint?: string; // 为造句题增加一个可选的中文提示
 }

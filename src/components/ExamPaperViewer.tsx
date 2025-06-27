@@ -228,6 +228,12 @@ function QuestionView({ question }: { question: Question }) {
               {guidedWritingData.words.join(' | ')}
             </span>
           </div>
+          {guidedWritingData.hint && (
+            <div className="mb-2 text-sm text-gray-600">
+              <span className="font-medium">提示：</span>
+              <span>{guidedWritingData.hint}</span>
+            </div>
+          )}
           <div className="flex flex-col gap-5 mt-1">
             <div className="w-full border-b border-gray-400 h-[1.5em]"></div>
             <div className="w-full border-b border-gray-400 h-[1.5em]"></div>

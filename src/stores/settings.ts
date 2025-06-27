@@ -2,10 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import dexieStorage from './storage';
 
-interface SettingsState {
+export interface SettingsState {
   apiUrl: string;
   apiToken: string;
-  setSettings: (apiUrl: string, apiToken: string) => void;
+  maxConcurrentTasks: number | null;
+  setSettings: (
+    apiUrl: string,
+    apiToken: string,
+    maxConcurrentTasks: number | null,
+  ) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -13,7 +18,9 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       apiUrl: '',
       apiToken: '',
-      setSettings: (apiUrl, apiToken) => set({ apiUrl, apiToken }),
+      maxConcurrentTasks: null,
+      setSettings: (apiUrl, apiToken, maxConcurrentTasks) =>
+        set({ apiUrl, apiToken, maxConcurrentTasks }),
     }),
     {
       name: 'dify-api-settings', // unique name for the storage

@@ -9,12 +9,14 @@ import {
   Divider,
   Card,
   Select,
+  Anchor,
+  Typography,
 } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { usePaperStore, useCourseStore } from '@/stores';
 import type { Paper } from '@/data/types/paper';
-
-const LAST_COURSE_ID_KEY = 'english-print-last-course-id';
+import { useEffect, useState } from 'react';
+import { LAST_COURSE_ID_KEY } from '@/utils/constants';
 
 interface BatchNewPaperModalProps {
   open: boolean;
@@ -37,6 +39,35 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
   const { addPaper } = usePaperStore();
   const { courses } = useCourseStore();
   const papers = Form.useWatch('papers', form);
+  const [activePaperIndex, setActivePaperIndex] = useState(0);
+
+  useEffect(() => {
+    if (open && (!papers || papers.length === 0)) {
+      const lastUsedCourseId = localStorage.getItem(LAST_COURSE_ID_KEY);
+
+      // 验证从 localStorage 获取的课程 ID 是否仍然有效
+      const isValidCourse = lastUsedCourseId
+        ? courses.some((c) => c.id === lastUsedCourseId)
+        : false;
+
+      // 如果记忆的课程ID无效，则从localStorage中移除
+      if (lastUsedCourseId && !isValidCourse) {
+        localStorage.removeItem(LAST_COURSE_ID_KEY);
+      }
+
+      const defaultCourseId =
+        isValidCourse && lastUsedCourseId
+          ? lastUsedCourseId
+          : courses.length > 0
+            ? courses.at(-1)?.id
+            : undefined;
+
+      form.setFieldsValue({
+        papers: [{ courseId: defaultCourseId }],
+      });
+      setActivePaperIndex(0);
+    }
+  }, [open, papers, courses, form]);
 
   const handleFinish = async (values: FormValues) => {
     if (!values.papers || values.papers.length === 0) {
@@ -46,7 +77,7 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
 
     try {
       values.papers.forEach((paperData) => {
-        const newPaper: Omit<Paper, 'id' | 'updatedAt'> = {
+        const newPaper: Partial<Paper> = {
           title: paperData.title,
           coreWords: paperData.coreWords,
           keySentences: paperData.story, // 将 story 映射到 keySentences
@@ -75,6 +106,7 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
 
   const handleClose = () => {
     form.resetFields();
+    setActivePaperIndex(0);
     onClose();
   };
 
@@ -83,7 +115,7 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
       open={open}
       onCancel={handleClose}
       title="批量新增试卷"
-      width={800}
+      width={1200}
       footer={[
         <Button key="back" onClick={handleClose}>
           取消
@@ -104,22 +136,88 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
 
         <Form.List name="papers">
           {(fields, { add, remove }) => (
-            <>
-              <div
-                style={{
-                  maxHeight: '55vh',
-                  overflowY: 'auto',
-                  padding: '1px 8px',
-                }}
-              >
-                {fields.map(({ key, name, ...restField }) => (
-                  <Card
-                    key={key}
-                    styles={{ body: { padding: '16px' } }}
+            <Row gutter={24}>
+              <Col span={6}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <Button
+                    type="dashed"
+                    onClick={() => {
+                      const lastCourseId =
+                        localStorage.getItem(LAST_COURSE_ID_KEY);
+                      add({ courseId: lastCourseId ?? undefined });
+                      setActivePaperIndex(fields.length); // 激活新添加的最后一项
+                    }}
+                    block
+                    icon={<PlusOutlined />}
                     style={{ marginBottom: 16 }}
                   >
-                    <Row gutter={16}>
-                      <Col span={23}>
+                    新增试卷
+                  </Button>
+                  <div
+                    style={{
+                      maxHeight: '60vh',
+                      overflowY: 'auto',
+                    }}
+                  >
+                    <Anchor
+                      targetOffset={0}
+                      affix={false}
+                      onClick={(e, link) => {
+                        e.preventDefault();
+                        const index = parseInt(link.href.replace('#', ''), 10);
+                        setActivePaperIndex(index);
+                      }}
+                      items={fields.map((field, index) => ({
+                        key: field.key.toString(),
+                        href: `#${index}`,
+                        title: (
+                          <Typography.Text
+                            ellipsis
+                            style={{
+                              color:
+                                activePaperIndex === index ? '#1677ff' : '',
+                            }}
+                          >
+                            {`${index + 1}. ${papers?.[index]?.title || '新试卷'}`}
+                          </Typography.Text>
+                        ),
+                      }))}
+                    />
+                  </div>
+                </div>
+              </Col>
+              <Col span={18}>
+                <div
+                  style={{
+                    maxHeight: '60vh',
+                    overflowY: 'auto',
+                    padding: '1px 8px',
+                  }}
+                >
+                  {fields.map(({ key, name, ...restField }, index) => (
+                    <div
+                      key={key}
+                      style={{
+                        display: index === activePaperIndex ? 'block' : 'none',
+                      }}
+                    >
+                      <Card
+                        title={`试卷 ${index + 1}`}
+                        extra={
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => {
+                              remove(name);
+                              // 如果删除的是当前激活的，或者比当前激活的更靠前
+                              if (index <= activePaperIndex) {
+                                setActivePaperIndex(Math.max(0, index - 1));
+                              }
+                            }}
+                          />
+                        }
+                      >
                         <Form.Item
                           {...restField}
                           name={[name, 'title']}
@@ -180,35 +278,12 @@ function BatchNewPaperModal({ open, onClose }: BatchNewPaperModalProps) {
                         >
                           <Input.TextArea rows={2} placeholder="输入备注信息" />
                         </Form.Item>
-                      </Col>
-                      <Col span={1}>
-                        <Button
-                          type="text"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => remove(name)}
-                          style={{ marginLeft: 'auto', display: 'block' }}
-                        />
-                      </Col>
-                    </Row>
-                  </Card>
-                ))}
-              </div>
-              <Form.Item style={{ marginTop: 8 }}>
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    const lastCourseId =
-                      localStorage.getItem(LAST_COURSE_ID_KEY);
-                    add({ courseId: lastCourseId ?? undefined }, 0);
-                  }}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  新增一个试卷
-                </Button>
-              </Form.Item>
-            </>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              </Col>
+            </Row>
           )}
         </Form.List>
       </Form>

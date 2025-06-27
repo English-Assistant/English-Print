@@ -48,6 +48,9 @@ export interface Paper {
   /** [类型优化] 试卷答案的JSON数据 */
   answerJson?: ExamAnswerSheet;
 
+  /** 记录的创建时间 */
+  createdAt: string;
+
   /** 记录的最后更新时间 */
   updatedAt: string;
 }

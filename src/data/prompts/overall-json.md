@@ -122,8 +122,11 @@
 
 ### **第二部分：`listeningMaterial` (JSON Object)**
 
-- **核心要求**：生成一个包含 **10 个独立对话**的JSON对象。每个对话都需要模拟真实的成人沟通场景。
-- **内容指引**：
+- **核心要求 (V2.1 - 支持TTS)**: 为了将来能对接 `edge-tts` 等语音合成服务，`listeningMaterial` 的结构需要调整。
+  - **角色清单**: 必须在 `listeningMaterial` 对象的顶层创建一个 `characters` 数组。此数组用于统一定义本部分出现的所有角色。
+  - **角色属性**: `characters` 数组中的每个角色对象**必须包含 `name` (字符串) 和 `gender` (枚举值: "Male" 或 "Female")** 两个字段。
+  - **对话生成**: 像以前一样生成 **10 个独立对话**。对话中的角色名 (`lines.character`) **必须**是 `characters` 数组中定义过的角色名。
+- **内容指引**:
   - **对话形式**: 每个对话必须是多角色对话，每个角色都必须有明确的英文名（如: "David", "Sarah"）。
   - **对话长度**: 每个对话包含 2-4 句交流。
   - **内容来源**: 对话内容应紧密围绕从小故事中分析出的**本课重点**，并结合`本节词汇`进行创作。听力对话本身**不必**直接复述小故事的情节。
@@ -132,9 +135,21 @@
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Listening Material Schema",
+  "title": "Listening Material Schema (V2.1 for TTS)",
   "type": "object",
   "properties": {
+    "characters": {
+      "type": "array",
+      "description": "A list of all unique characters appearing in the dialogues, with their gender.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "gender": { "type": "string", "enum": ["Male", "Female"] }
+        },
+        "required": ["name", "gender"]
+      }
+    },
     "dialogues": {
       "type": "array",
       "description": "An array of 10 dialogue objects.",
@@ -161,7 +176,7 @@
               "properties": {
                 "character": {
                   "type": "string",
-                  "description": "The name of the character speaking."
+                  "description": "The name of the character speaking. MUST match a name in the top-level 'characters' array."
                 },
                 "sentence": {
                   "type": "string",
@@ -176,7 +191,7 @@
       }
     }
   },
-  "required": ["dialogues"]
+  "required": ["characters", "dialogues"]
 }
 ```
 
@@ -234,8 +249,9 @@
 * **【！！！最重要结构指令！！！】**: 为了保证结构的一致性，每一个大题 (`section`) 内部，**应尽可能只使用一个 `part` 对象**。该 `part` 对象中的 `content` 数组应包含此大题下的所有题目。只有当一个大题内部有完全不同的题目类型和说明时，才允许使用多个`part`。
 * **【强制指令】**: 每一个大题 (`section`) 内部的题目，其题干（即`questionText`或`text`字段）**必须以 '序号. ' 开头** (例如: "1. ", "2. ", "3. ")。请确保**所有题型**（包括选择题、判断题、改错题、造句题等）都严格遵循此规则。
 * **序号重置规则**: 每一个大题 (`section`) 内部的题目序号，都必须从 **1** 开始重新计数。
+* **【绝对强制】单选题正确性**: 所有`MULTI_SELECT_CHOICE`题型，**必须保证只有一个唯一、明确的正确答案**。其他选项必须是清晰的、无争议的错误干扰项。严禁出现模棱两可或多个选项都可能正确的题目。
 
-- **题型结构规划 (V2.2 - 支持阅读短文和结构化造句)**:
+- **题型结构规划 (V2.3 - 强化约束)**:
 
 **【！！！针对选择题选项的绝对强制指令！！！】**:
 
@@ -244,15 +260,17 @@
 - **正确示例**: `options: ["spring", "summer", "autumn"]`
 - **错误示例**: `options: ["A. spring", "B. summer", "C. autumn"]`
 
-1. **I. 听力理解 (Listening Comprehension)**: 约10题, `MULTI_SELECT_CHOICE`.
+1. **I. 听力理解 (Listening Comprehension)**: 10题, `MULTI_SELECT_CHOICE`. **【强制指令】**: **必须**为`listeningMaterial`部分生成的 **10 个对话中的每一个**，创建 **1 道**理解题。题目必须直接与对应对话的内容相关。
 2. **II. 单词拼写 (Word Spelling)**: 约6题, `FILL_IN_BLANK`.
-3. **III. 判断题 (True/False)**: 约5题, `TRUE_FALSE`.
+3. **III. 判断题 (True/False)**: 约5题, `TRUE_FALSE`. **【强制指令】**: **必须**在此题型的 `part` 中提供一段简短的 `passage` (阅读材料)。所有的判断题都必须依据此 `passage` 的内容来设置，让学生可以根据短文判断对错。
 4. **IV. 词汇选择 (Vocabulary Choice)**: 约5题, `MULTI_SELECT_CHOICE`.
 5. **V. 语法选择 (Grammar Choice)**: 约5题, `MULTI_SELECT_CHOICE`.
 6. **VI. 情景对话 (Dialogue Completion)**: 约4题, `MULTI_SELECT_CHOICE`. **指令**: 在 `part` 中提供一段 `passage` 作为对话上下文，然后基于此对话出题。
 7. **VII. 阅读理解 (Reading Comprehension)**: 约5题, `MULTI_SELECT_CHOICE`. **指令**: 在 `part` 中提供一段 `passage` 作为阅读短文，然后基于此短文出题。
 8. **VIII. 句子改错 (Error Correction)**: 约6题, `OPEN_ENDED`.
-9. **IX. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`. **指令**: 在题目的 `data.words` 数组中提供打乱顺序的单词或词组。
+9. **IX. 造句 (Sentence Creation)**: 约2题, `GUIDED_WRITING`. **【强制指令】**:
+   - **必须**在 `data.words` 数组中提供**打乱顺序的**单词或词组。
+   - **必须**在 `data.hint` 字段中提供该句子的**中文翻译**作为提示。
 
 - **格式**: 生成一个JSON对象，它将作为最终输出的JSON对象中 `examPaper` 键的值。请严格遵循下面提供的 Schema 来构建这个JSON对象。
 
@@ -445,7 +463,11 @@
           "words": {
             "type": "array",
             "items": { "type": "string" },
-            "description": "提供给学生用于造句的单词或词组列表"
+            "description": "提供给学生用于造句的、已打乱顺序的单词或词组列表"
+          },
+          "hint": {
+            "type": "string",
+            "description": "该句子的中文翻译提示"
           }
         },
         "required": ["id", "words"]

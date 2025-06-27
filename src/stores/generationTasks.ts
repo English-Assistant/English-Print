@@ -5,11 +5,11 @@ import { runDifyWorkflow } from '@/apis/generation';
 import { validateGeneratedPaperData } from '@/utils/schemaValidators';
 import type { Paper } from '@/data/types/paper';
 import type { GeneratedPaperData } from '@/data/types/generation';
-import dayjs from 'dayjs';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import dexieStorage from './storage';
+import { useSettingsStore } from './settings';
 
-type TaskStatus = 'processing' | 'success' | 'error';
+type TaskStatus = 'pending' | 'processing' | 'success' | 'error';
 
 export interface GenerationTask {
   id: string;
@@ -30,84 +30,48 @@ interface GenerationTaskStore {
   retryTask: (taskId: string) => Promise<void>;
   clearTask: (paperId: string) => void;
   getTaskByPaperId: (paperId: string) => GenerationTask | undefined;
+  processQueue: () => void;
+  _runTask: (task: GenerationTask) => Promise<void>;
 }
 
 export const useGenerationTaskStore = create(
   persist<GenerationTaskStore>(
     (set, get) => ({
       tasks: [],
-      getTaskByPaperId: (paperId) => {
-        const tasksForPaper = get().tasks.filter((t) => t.paperId === paperId);
-        if (tasksForPaper.length === 0) return undefined;
-        // 返回最新的任务
-        return tasksForPaper.sort((a, b) => b.startTime - a.startTime)[0];
-      },
-      clearTask: (paperId) => {
-        set((state) => ({
-          tasks: state.tasks.filter((t) => t.paperId !== paperId),
-        }));
-      },
-      cancelTask: (taskId) => {
-        set((state) => ({
-          tasks: state.tasks.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  status: 'error',
-                  error: '用户手动取消',
-                  endTime: Date.now(),
-                }
-              : t,
-          ),
-        }));
-      },
-      retryTask: async (taskId) => {
-        const task = get().tasks.find((t) => t.id === taskId);
-        if (!task) return;
 
-        const paper = usePaperStore.getState().getPaperById(task.paperId);
-        if (!paper) {
+      processQueue: () => {
+        const { tasks, _runTask } = get();
+        const { maxConcurrentTasks } = useSettingsStore.getState();
+        const limit = maxConcurrentTasks ?? Infinity;
+
+        const processingTasksCount = tasks.filter(
+          (t) => t.status === 'processing',
+        ).length;
+
+        if (processingTasksCount >= limit) {
+          return;
+        }
+
+        const pendingTask = tasks.find((t) => t.status === 'pending');
+        if (pendingTask) {
           set((state) => ({
             tasks: state.tasks.map((t) =>
-              t.id === taskId
-                ? { ...t, status: 'error', error: '找不到原始试卷' }
-                : t,
+              t.id === pendingTask.id ? { ...t, status: 'processing' } : t,
             ),
           }));
-          return;
+          _runTask(pendingTask);
         }
-
-        set((state) => ({
-          tasks: state.tasks.filter((t) => t.id !== taskId),
-        }));
-
-        await get().startGeneration(paper);
       },
-      startGeneration: async (paper) => {
-        // 通过getTaskByPaperId获取最新的task
-        const latestTask = get().getTaskByPaperId(paper.id);
-        // 如果最新的任务正在运行中，则不执行任何操作
-        if (latestTask && latestTask.status === 'processing') {
-          return;
-        }
 
-        const taskId = `${paper.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-        const newTask: GenerationTask = {
-          id: taskId,
-          paperId: paper.id,
-          paperTitle: paper.title,
-          courseId: paper.courseId,
-          status: 'processing',
-          startTime: Date.now(),
-        };
-
-        set((state) => ({
-          tasks: [...state.tasks, newTask],
-        }));
-
+      _runTask: async (task) => {
         try {
           const allPapers = usePaperStore.getState().papers;
           const globalWords = useVocabularyStore.getState().words;
+          const paper = allPapers.find((p) => p.id === task.paperId);
+          if (!paper) {
+            throw new Error('找不到原始试卷');
+          }
+
           const otherPaperWords = allPapers
             .filter((p) => p.id !== paper.id)
             .flatMap((p) => p.coreWords?.split(/[,\\s]+/) || [])
@@ -133,11 +97,10 @@ export const useGenerationTaskStore = create(
             copyJson: result.copyExercise,
             examJson: result.examPaper,
             answerJson: result.examAnswers,
-            updatedAt: dayjs().toISOString(),
           });
           set((state) => ({
             tasks: state.tasks.map((t) =>
-              t.id === taskId
+              t.id === task.id
                 ? {
                     ...t,
                     status: 'success',
@@ -147,22 +110,91 @@ export const useGenerationTaskStore = create(
                 : t,
             ),
           }));
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : '发生未知错误';
+        } catch (e) {
+          const error = e as Error;
           set((state) => ({
             tasks: state.tasks.map((t) =>
-              t.id === taskId
+              t.id === task.id
                 ? {
                     ...t,
                     status: 'error',
-                    error: errorMessage,
+                    error: error.message,
                     endTime: Date.now(),
                   }
                 : t,
             ),
           }));
+        } finally {
+          get().processQueue();
         }
+      },
+
+      getTaskByPaperId: (paperId) => {
+        const tasksForPaper = get().tasks.filter((t) => t.paperId === paperId);
+        if (tasksForPaper.length === 0) return undefined;
+        return tasksForPaper.sort((a, b) => b.startTime - a.startTime)[0];
+      },
+
+      clearTask: (paperId) => {
+        set((state) => ({
+          tasks: state.tasks.filter((t) => t.paperId !== paperId),
+        }));
+      },
+
+      cancelTask: (taskId) => {
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  status: 'error',
+                  error: '用户手动取消',
+                  endTime: Date.now(),
+                }
+              : t,
+          ),
+        }));
+        get().processQueue();
+      },
+
+      retryTask: async (taskId) => {
+        const task = get().tasks.find((t) => t.id === taskId);
+        if (!task) return;
+
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t.id === taskId ? { ...t, status: 'pending', error: undefined } : t,
+          ),
+        }));
+
+        get().processQueue();
+      },
+
+      startGeneration: async (paper) => {
+        const latestTask = get().getTaskByPaperId(paper.id);
+        if (
+          latestTask &&
+          (latestTask.status === 'processing' ||
+            latestTask.status === 'pending')
+        ) {
+          return;
+        }
+
+        const taskId = `${paper.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        const newTask: GenerationTask = {
+          id: taskId,
+          paperId: paper.id,
+          paperTitle: paper.title,
+          courseId: paper.courseId,
+          status: 'pending',
+          startTime: Date.now(),
+        };
+
+        set((state) => ({
+          tasks: [...state.tasks, newTask],
+        }));
+
+        get().processQueue();
       },
     }),
     {
@@ -171,7 +203,10 @@ export const useGenerationTaskStore = create(
       partialize: (state) => ({
         ...state,
         tasks: state.tasks.filter(
-          (task) => task.status === 'success' || task.status === 'error',
+          (task) =>
+            task.status === 'success' ||
+            task.status === 'error' ||
+            task.status === 'pending',
         ),
       }),
     },

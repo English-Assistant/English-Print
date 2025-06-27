@@ -5,13 +5,14 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Paper } from '@/data/types/paper';
 import dexieStorage from './storage';
 
-interface PaperStore {
+export interface PaperStore {
   papers: Paper[];
   getPaperById: (id: string) => Paper | undefined;
-  // [修正] addPaper 的输入类型应不包含由store管理的字段
-  addPaper: (p: Omit<Paper, 'id' | 'updatedAt'>) => void;
+  // [修正] addPaper 的输入类型应为 Partial<Paper> 以增加灵活性
+  addPaper: (p: Partial<Paper>) => void;
   deletePaper: (id: string) => void;
   updatePaper: (id: string, updatedFields: Partial<Omit<Paper, 'id'>>) => void;
+  deletePapersByCourseId: (courseId: string) => void;
 }
 
 export const usePaperStore = create<PaperStore>()(
@@ -19,24 +20,34 @@ export const usePaperStore = create<PaperStore>()(
     (set, get) => ({
       papers: [],
       getPaperById: (id) => get().papers.find((p) => p.id === id),
-      addPaper: (p) =>
+      addPaper: (p) => {
+        const now = new Date().toISOString();
+        const newPaper: Paper = {
+          title: '',
+          coreWords: '',
+          keySentences: '',
+          ...p,
+          id: p.id || crypto.randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        };
         set((state) => ({
-          papers: [
-            ...state.papers,
-            {
-              ...p, // 先展开传入的数据
-              id: Date.now().toString(), // [修正] store负责生成ID
-              updatedAt: new Date().toISOString(), // [修正] store负责生成初始时间戳
-            },
-          ],
-        })),
+          papers: [...state.papers, newPaper],
+        }));
+      },
       deletePaper: (id) =>
         set((state) => ({ papers: state.papers.filter((p) => p.id !== id) })),
       updatePaper: (id, updatedFields) =>
         set((state) => ({
           papers: state.papers.map((p) =>
-            p.id === id ? { ...p, ...updatedFields } : p,
+            p.id === id
+              ? { ...p, ...updatedFields, updatedAt: new Date().toISOString() }
+              : p,
           ),
+        })),
+      deletePapersByCourseId: (courseId) =>
+        set((state) => ({
+          papers: state.papers.filter((p) => p.courseId !== courseId),
         })),
     }),
     {

@@ -2,14 +2,7 @@ import useIsPrinting from '@/hooks/useIsPrinting';
 import { createRootRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-import {
-  ConfigProvider,
-  theme,
-  FloatButton,
-  App,
-  Button,
-  notification,
-} from 'antd';
+import { ConfigProvider, theme, FloatButton, App, Button, Space } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import 'dayjs/locale/zh-cn';
 import zhCN from 'antd/locale/zh_CN';
@@ -19,10 +12,10 @@ import { useGenerationTaskStore } from '@/stores';
 import type { GenerationTask } from '@/stores';
 
 function GenerationNotifier() {
-  const tasks = useGenerationTaskStore((s) => s.tasks);
-  const clearTask = useGenerationTaskStore((s) => s.clearTask);
+  const { tasks, clearTask, retryTask } = useGenerationTaskStore();
   const prevTasksRef = useRef<GenerationTask[]>([]);
   const navigate = useNavigate();
+  const { notification } = App.useApp();
 
   useEffect(() => {
     tasks.forEach((task) => {
@@ -61,13 +54,50 @@ function GenerationNotifier() {
               });
             },
           });
-        } else if (task.status === 'error') {
+        } else if (task.status === 'error' && task.error) {
+          const errorKey = `task-failed-${task.id}`;
+          const errorBtn = (
+            <Space>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => {
+                  retryTask(task.id);
+                  notification.destroy(errorKey);
+                }}
+              >
+                重试
+              </Button>
+              <Button
+                size="small"
+                onClick={() => notification.destroy(errorKey)}
+              >
+                关闭
+              </Button>
+            </Space>
+          );
           notification.error({
-            key,
+            key: errorKey,
             message: '试卷生成失败',
-            description: `试卷《${task.paperTitle}》生成失败: ${task.error}`,
+            description: (
+              <>
+                <div>{`试卷《${task.paperTitle}》生成失败:`}</div>
+                <div
+                  style={{
+                    maxHeight: 100,
+                    overflowY: 'auto',
+                    marginTop: 8,
+                    padding: '8px 12px',
+                    backgroundColor: 'rgba(0,0,0,0.02)',
+                    borderRadius: 4,
+                  }}
+                >
+                  {task.error}
+                </div>
+              </>
+            ),
             duration: 0, // 永久显示直到用户关闭
-            btn,
+            btn: errorBtn,
           });
         }
       }
@@ -75,7 +105,7 @@ function GenerationNotifier() {
 
     // 更新 prevTasks 以便下次比较
     prevTasksRef.current = tasks;
-  }, [tasks, clearTask, navigate]);
+  }, [tasks, clearTask, retryTask, navigate, notification]);
 
   return null;
 }

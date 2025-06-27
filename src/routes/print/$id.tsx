@@ -23,7 +23,7 @@ function ContentAggregationPage() {
   const course = useCourseStore((state) =>
     state.getCourseById(paper?.courseId ?? ''),
   );
-  useTitle(paper ? `${paper.title} - 打印预览` : '打印预览');
+  useTitle(paper ? `${paper.title}-${course?.title} - 打印预览` : '打印预览');
 
   if (!paper) {
     return (

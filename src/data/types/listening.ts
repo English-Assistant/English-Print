@@ -4,7 +4,13 @@
  * This corresponds to the `listening.schema.json`.
  */
 
+export interface Character {
+  name: string;
+  gender: 'Male' | 'Female';
+}
+
 export interface ListeningMaterial {
+  characters: Character[];
   dialogues: Dialogue[];
 }
 

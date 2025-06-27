@@ -21,6 +21,28 @@
       "type": "object",
       "description": "A JSON object for listening practice, containing dialogues.",
       "properties": {
+        "characters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "gender": {
+                "type": "string",
+                "enum": [
+                  "Male",
+                  "Female"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "gender"
+            ]
+          }
+        },
         "dialogues": {
           "type": "array",
           "items": {
@@ -60,6 +82,7 @@
         }
       },
       "required": [
+        "characters",
         "dialogues"
       ]
     },
@@ -218,6 +241,7 @@
           "const": "QUESTION"
         },
         "questionType": {
+          "type": "string",
           "enum": [
             "MULTI_SELECT_CHOICE",
             "TRUE_FALSE",
@@ -235,7 +259,89 @@
         "questionType",
         "data"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "MULTI_SELECT_CHOICE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/multiSelectChoice"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "TRUE_FALSE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/trueFalse"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "FILL_IN_BLANK"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/fillInBlank"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "OPEN_ENDED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/openEnded"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "questionType": {
+                "const": "GUIDED_WRITING"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/questionData/guidedWriting"
+              }
+            }
+          }
+        }
+      ]
     },
     "answerSection": {
       "type": "object",
@@ -302,6 +408,104 @@
         "answer"
       ],
       "additionalProperties": false
+    },
+    "questionData": {
+      "multiSelectChoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "questionText",
+          "options"
+        ]
+      },
+      "trueFalse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "questionText": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "questionText"
+        ]
+      },
+      "fillInBlank": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          },
+          "stem": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "hint",
+          "stem"
+        ]
+      },
+      "openEnded": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ]
+      },
+      "guidedWriting": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "words"
+        ]
+      }
     }
   }
 }

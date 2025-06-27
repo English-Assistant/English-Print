@@ -1,8 +1,31 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Listening Material Schema",
+  "title": "Listening Material Schema (V2.1 for TTS)",
   "type": "object",
   "properties": {
+    "characters": {
+      "type": "array",
+      "description": "A list of all unique characters appearing in the dialogues, with their gender.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "Male",
+              "Female"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "gender"
+        ]
+      }
+    },
     "dialogues": {
       "type": "array",
       "description": "An array of 10 dialogue objects.",
@@ -29,7 +52,7 @@
               "properties": {
                 "character": {
                   "type": "string",
-                  "description": "The name of the character speaking."
+                  "description": "The name of the character speaking. MUST match a name in the top-level 'characters' array."
                 },
                 "sentence": {
                   "type": "string",
@@ -52,6 +75,7 @@
     }
   },
   "required": [
+    "characters",
     "dialogues"
   ]
 }

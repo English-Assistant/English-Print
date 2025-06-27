@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import dexieStorage from './storage';
 
-interface VocabularyStore {
+export interface VocabularyStore {
   words: string[];
   addWord: (word: string) => void;
   deleteWord: (word: string) => void;

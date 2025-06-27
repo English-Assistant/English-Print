@@ -1,42 +1,48 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Course } from '../data/types/course';
+import type { Course } from '@/data/types/course';
 import dexieStorage from './storage';
+import dayjs from 'dayjs';
+import { usePaperStore } from './papers';
 
-interface CourseStore {
+export interface CourseStore {
   courses: Course[];
-  getCourseById: (id: string) => Course | undefined;
-  addCourse: (course: Omit<Course, 'id' | 'createdAt'>) => void;
+  addCourse: (course: Partial<Course>) => void;
+  updateCourse: (id: string, updates: Partial<Omit<Course, 'id'>>) => void;
   deleteCourse: (id: string) => void;
-  updateCourse: (id: string, patch: Partial<Omit<Course, 'id'>>) => void;
+  getCourseById: (id: string) => Course | undefined;
 }
 
-export const useCourseStore = create<CourseStore>()(
-  persist(
+export const useCourseStore = create(
+  persist<CourseStore>(
     (set, get) => ({
       courses: [],
-      getCourseById: (id) => get().courses.find((c) => c.id === id),
-      addCourse: (course) =>
-        set((state) => ({
-          courses: [
-            ...state.courses,
-            {
-              ...course,
-              id: Date.now().toString(),
-              createdAt: new Date().toISOString(),
-            },
-          ],
-        })),
-      updateCourse: (id, patch) =>
+      addCourse: (course) => {
+        const newCourse: Course = {
+          id: course.id || `course-${dayjs().valueOf()}`,
+          title: course.title || '',
+          description: course.description || '',
+          createdAt: dayjs().toISOString(),
+        };
+        set((state) => ({ courses: [...state.courses, newCourse] }));
+      },
+      updateCourse: (id, updates) =>
         set((state) => ({
           courses: state.courses.map((c) =>
-            c.id === id ? { ...c, ...patch } : c,
+            c.id === id ? { ...c, ...updates } : c,
           ),
         })),
-      deleteCourse: (id) =>
+      deleteCourse: (id) => {
+        // 1. 先删除关联的试卷
+        usePaperStore.getState().deletePapersByCourseId(id);
+        // 2. 再删除课程本身
         set((state) => ({
           courses: state.courses.filter((c) => c.id !== id),
-        })),
+        }));
+      },
+      getCourseById: (id) => {
+        return get().courses.find((c) => c.id === id);
+      },
     }),
     {
       name: 'course-storage',
